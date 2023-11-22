@@ -1,24 +1,22 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Rehawk.UIFramework
 {
-    [Serializable]
-    public class UIElementGroup
+    public class UIElementGroup : UIElementBase
     {
-        [SerializeField] private UIElementBase[] elements;
+        [SerializeField] private UIElementBase[] targets;
 
         private bool isVisible;
             
-        public bool IsVisible
+        public override bool IsVisible
         {
             get { return isVisible; }
             set 
             { 
                 isVisible = value;
-                for (int i = 0; i < elements.Length; i++)
+                for (int i = 0; i < targets.Length; i++)
                 {
-                    elements[i].IsVisible = isVisible;
+                    targets[i].IsVisible = isVisible;
                 }
             }
         }

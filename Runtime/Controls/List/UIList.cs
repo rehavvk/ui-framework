@@ -5,22 +5,65 @@ using UnityEngine;
 
 namespace Rehawk.UIFramework
 {
+    // TODO: RefreshItems is still a little bit wonky. A smarter algorithm would be nice to keep unchanged items unchanged. 
+    
     public class UIList : UIListBase
     {
         private IUIListItemStrategy itemStrategy;
         private Type itemReceiverType;
-
+        
         private readonly List<object> datasets = new List<object>();
         private readonly List<object> newDatasets = new List<object>();
-        private int itemCount;
+        
+        private IEnumerable items;
+        private int count;
         
         private UIListItemCallbackDelegate onInitialized;
         private UIListItemCallbackDelegate onActivated;
         private UIListItemCallbackDelegate onDeactivated;
 
-        public override IReadOnlyList<GameObject> Items
+        public override IEnumerable Items
         {
-            get { return itemStrategy.Items; }    
+            get { return items; }
+            set
+            {
+                items = value;
+                
+                int newCount = 0;
+
+                if (items != null)
+                {
+                    foreach (object data in items)
+                    {
+                        newDatasets.Add(data);
+                        newCount += 1;
+                    }
+                }
+
+                count = newCount;
+                
+                RefreshItems();
+                
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(Count));
+            }
+        }
+
+        public override int Count
+        {
+            get { return count; }
+            set
+            {
+                if (SetField(ref count, value))
+                {
+                    RefreshItems();
+                }
+            }
+        }
+
+        public override IReadOnlyList<GameObject> ItemObjects
+        {
+            get { return itemStrategy.ItemObjects; }    
         }
 
         protected override void OnDestroy()
@@ -28,13 +71,6 @@ namespace Rehawk.UIFramework
             base.OnDestroy();
             
             itemStrategy.Clear();
-        }
-
-        protected override void AfterContextChanged()
-        {
-            base.AfterContextChanged();
-
-            RefreshItems();
         }
 
         public override void SetItemStrategy(IUIListItemStrategy itemStrategy)
@@ -97,25 +133,6 @@ namespace Rehawk.UIFramework
 
         private void RefreshItems()
         {
-            itemCount = 0;
-            
-            switch (RawContext)
-            {
-                case IEnumerable enumerableContext:
-                {
-                    foreach (object data in enumerableContext)
-                    {
-                        newDatasets.Add(data);
-                        itemCount += 1;
-                    }
-
-                    break;
-                }
-                case int intContext:
-                    itemCount = intContext;
-                    break;
-            }
-            
             for (int i = 0; i < datasets.Count; i++)
             {
                 object oldData = null;
@@ -124,9 +141,9 @@ namespace Rehawk.UIFramework
                     oldData = datasets[i];
                 }
 
-                GameObject item = itemStrategy.GetItem(i);
+                GameObject item = itemStrategy.GetItemObject(i);
                 
-                if (i < itemCount)
+                if (i < count)
                 {
                     object data = null;
                     if (i < newDatasets.Count)
@@ -138,27 +155,29 @@ namespace Rehawk.UIFramework
                     {
                         InvokeCallback(UIListItemCallback.Deactivated, i, item, oldData);
                         
-                        ItemReport report = itemStrategy.SetItem(i, data);
-                        InformListItemReceiver(item, i, data);
+                        ItemReport report = itemStrategy.SetItemObject(i, data);
+                        GameObject setItem = report.Object;
+                        
+                        InformListItemReceiver(setItem, i, data);
                         
                         if (report.IsNew)
                         {
-                            InvokeCallback(UIListItemCallback.Initialized, i, report.Object, data);
+                            InvokeCallback(UIListItemCallback.Initialized, i, setItem, data);
                         }
                     
-                        InvokeCallback(UIListItemCallback.Activated, i, report.Object, data);
+                        InvokeCallback(UIListItemCallback.Activated, i, setItem, data);
                     }
                 }
                 else
                 {
                     InvokeCallback(UIListItemCallback.Deactivated, i, item, oldData);
-                    itemStrategy.RemoveItem(i);
+                    itemStrategy.RemoveItemObject(item);
                 }
             }
-                
-            if (itemStrategy.Items.Count < itemCount)
+            
+            if (itemStrategy.ItemObjects.Count < count)
             {
-                for (int i = itemStrategy.Items.Count; i < itemCount; i++)
+                for (int i = itemStrategy.ItemObjects.Count; i < count; i++)
                 {
                     object data = null;
                     if (i < newDatasets.Count)
@@ -166,7 +185,7 @@ namespace Rehawk.UIFramework
                         data = newDatasets[i];
                     }
                     
-                    ItemReport report = itemStrategy.AddItem(i, data);
+                    ItemReport report = itemStrategy.AddItemObject(i, data);
                     InformListItemReceiver(report.Object, i, data);
 
                     if (report.IsNew)
@@ -177,7 +196,7 @@ namespace Rehawk.UIFramework
                     InvokeCallback(UIListItemCallback.Activated, i, report.Object, data);
                 }
             }
-            
+
             datasets.Clear();
             datasets.AddRange(newDatasets);
             newDatasets.Clear();

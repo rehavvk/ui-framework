@@ -25,12 +25,12 @@ namespace Rehawk.UIFramework
         
         public ContextualPrefabUIListItemStrategy(Dependencies dependencies, GetPrefabFunctionDelegate getItemPrefab) : this(dependencies.itemRoot, getItemPrefab) { }
 
-        public IReadOnlyList<GameObject> Items
+        public IReadOnlyList<GameObject> ItemObjects
         {
             get { return items; }
         }
 
-        public GameObject GetItem(int index)
+        public GameObject GetItemObject(int index)
         {
             if (index >= 0 && index < items.Count)
             {
@@ -40,17 +40,17 @@ namespace Rehawk.UIFramework
             return null;
         }
         
-        public ItemReport SetItem(int index, object data)
+        public ItemReport SetItemObject(int index, object data)
         {
-            GameObject oldItem = GetItem(index);
+            GameObject oldItem = GetItemObject(index);
             GameObject oldItemPrefab = itemPrefabs[index];
             
             GameObject itemPrefab = getItemPrefab.Invoke(index, data);
 
             if (itemPrefab != oldItemPrefab)
             {
-                RemoveItem(index);
-                return AddItem(index, data);
+                RemoveItemObject(oldItem);
+                return AddItemObject(index, data);
             }
             
             oldItem.transform.SetSiblingIndex(index);
@@ -59,14 +59,14 @@ namespace Rehawk.UIFramework
             return new ItemReport(oldItem, false);
         }
 
-        public ItemReport AddItem(int index, object data)
+        public ItemReport AddItemObject(int index, object data)
         {
             GameObject itemPrefab = getItemPrefab.Invoke(index, data);
             
             GameObject item = UIGameObjectFactory.Create(itemPrefab, root.transform);
             
-            items.Add(item);
-            itemPrefabs.Add(itemPrefab);
+            items.Insert(index, item);
+            itemPrefabs.Insert(index, itemPrefab);
 
             item.transform.SetSiblingIndex(index);
             item.SetActive(true);
@@ -74,18 +74,31 @@ namespace Rehawk.UIFramework
             return new ItemReport(item, true);
         }
 
-        public void RemoveItem(int index)
+        public void RemoveItemObject(GameObject item)
         {
-            UIGameObjectFactory.Destroy(items[index]);
+            if (item == null)
+            {
+                return;
+            }
+            
+            int index = items.IndexOf(item);
+
+            if (index < 0)
+            {
+                return;
+            }
+
             items.RemoveAt(index);
             itemPrefabs.RemoveAt(index);
+                
+            UIGameObjectFactory.Destroy(item);
         }
 
         public void Clear()
         {
-            for (int i = 0; i < items.Count; i++)
+            for (int i = items.Count - 1; i >= 0; i--)
             {
-                RemoveItem(i);
+                RemoveItemObject(GetItemObject(i));
             }
         }
         

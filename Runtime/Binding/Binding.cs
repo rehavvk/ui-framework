@@ -198,7 +198,6 @@ namespace Rehawk.UIFramework
             }
         }
 
-        
         public static Binding BindMember<T>(object parent, Func<object> getContextFunction, Expression<Func<T>> memberExpression, BindingDirection direction = BindingDirection.OneWay)
         {
             var binding = new Binding(parent);

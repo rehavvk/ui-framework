@@ -34,7 +34,7 @@ namespace Rehawk.UIFramework
         
         public PredefinedUIListItemStrategy(Dependencies dependencies) : this(dependencies.items) { }
 
-        public IReadOnlyList<GameObject> Items
+        public IReadOnlyList<GameObject> ItemObjects
         {
             get { return items; }
         }
@@ -55,7 +55,7 @@ namespace Rehawk.UIFramework
             }
         }
 
-        public GameObject GetItem(int index)
+        public GameObject GetItemObject(int index)
         {
             if (index >= 0 && index < items.Count)
             {
@@ -65,9 +65,9 @@ namespace Rehawk.UIFramework
             return null;
         }
         
-        public ItemReport SetItem(int index, object data)
+        public ItemReport SetItemObject(int index, object data)
         {
-            GameObject item = GetItem(index);
+            GameObject item = GetItemObject(index);
             
             item.transform.SetSiblingIndex(index);
             item.SetActive(true);
@@ -75,7 +75,7 @@ namespace Rehawk.UIFramework
             return new ItemReport(item, false);
         }
 
-        public ItemReport AddItem(int index, object data)
+        public ItemReport AddItemObject(int index, object data)
         {
             ItemReport addReport;
             
@@ -99,18 +99,30 @@ namespace Rehawk.UIFramework
             return addReport;
         }
 
-        public void RemoveItem(int index)
+        public void RemoveItemObject(GameObject item)
         {
-            items[index].SetActive(KeepEmptyActive);
-            emptyItemsQueue.Enqueue(items[index]);
-            emptyItems.Add(items[index]);
+            if (item == null)
+            {
+                return;
+            }
+            
+            int index = items.IndexOf(item);
+
+            if (index < 0)
+            {
+                return;
+            }
+
+            item.SetActive(KeepEmptyActive);
+            emptyItemsQueue.Enqueue(item);
+            emptyItems.Add(item);
         }
 
         public void Clear()
         {
-            for (int i = 0; i < items.Count; i++)
+            for (int i = items.Count - 1; i >= 0; i--)
             {
-                RemoveItem(i);
+                RemoveItemObject(GetItemObject(i));
             }
         }
 

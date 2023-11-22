@@ -108,11 +108,6 @@ namespace Rehawk.UIFramework
             return binding;
         }
         
-        public Binding BindItems(Func<UIListBase> getListCallback, BindingDirection direction = BindingDirection.OneWay)
-        {
-            return BindContext(getListCallback, direction);
-        }
-        
         public Binding BindCallback<T>(Action<T> setCallback)
         {
             var binding = Binding.BindCallback<T>(this, () => default, setCallback);
