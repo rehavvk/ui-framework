@@ -24,7 +24,7 @@ namespace Rehawk.UIFramework
             this.getItemPrefab = getItemPrefab;
         }
         
-        public ContextualPrefabUIListItemStrategy(Dependencies dependencies, GetPrefabFunctionDelegate getItemPrefab) : this(dependencies.itemObjectRoot, getItemPrefab) { }
+        public ContextualPrefabUIListItemStrategy(Dependencies dependencies, GetPrefabFunctionDelegate getItemPrefab) : this(dependencies.itemRoot, getItemPrefab) { }
 
         public IReadOnlyList<GameObject> ItemObjects
         {
@@ -120,7 +120,7 @@ namespace Rehawk.UIFramework
         [Serializable]
         public class Dependencies
         {
-            public Transform itemObjectRoot;
+            public Transform itemRoot;
         }
     }
 }
