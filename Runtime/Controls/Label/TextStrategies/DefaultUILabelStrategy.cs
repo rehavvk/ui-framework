@@ -2,18 +2,18 @@
 
 namespace Rehawk.UIFramework
 {
-    public class DefaultUILabelTextStrategy : IUILabelTextStrategy
+    public class DefaultTextStrategy : IUILabelTextStrategy
     {
         private string text;
 
         public event Action<string> TextChanged;
 
-        public string GetText(UILabel label)
+        public string GetText(UILabelBase label)
         {
             return text;
         }
 
-        public bool SetText(UILabel label, string value)
+        public bool SetText(UILabelBase label, string value)
         {
             if (text != value)
             {

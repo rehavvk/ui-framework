@@ -9,7 +9,8 @@ namespace Rehawk.UIFramework
         GameObject GetItemObject(int index);
         ItemReport SetItemObject(int index, object data);
         ItemReport AddItemObject(int index, object data);
-        void RemoveItemObject(GameObject itemObject);
-        void Clear();
+        void DeactivateItemObject(GameObject itemObject);
+        void RemoveInactiveItemObjects();
+        void RemoveAllItemObjects();
     }
 }

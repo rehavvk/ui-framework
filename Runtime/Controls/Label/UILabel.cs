@@ -73,7 +73,7 @@ namespace Rehawk.UIFramework
 
             if (strategy == null)
             {
-                SetStrategy(new DefaultUILabelTextStrategy());
+                SetStrategy(new DefaultTextStrategy());
             }
         }
 

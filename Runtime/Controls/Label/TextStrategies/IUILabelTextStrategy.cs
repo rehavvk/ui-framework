@@ -6,7 +6,7 @@ namespace Rehawk.UIFramework
     {
         public event Action<string> TextChanged;
         
-        string GetText(UILabel label);
-        bool SetText(UILabel label, string value);
+        string GetText(UILabelBase label);
+        bool SetText(UILabelBase label, string value);
     }
 }

@@ -12,7 +12,8 @@ namespace Rehawk.UIFramework
         private readonly Transform root;
         private readonly GameObject itemPrefab;
         
-        private readonly List<GameObject> items = new List<GameObject>();
+        private readonly List<GameObject> itemObjects = new List<GameObject>();
+        private readonly List<GameObject> inactiveItemObjects = new List<GameObject>();
 
         public PrefabUIListItemStrategy(Transform root, GameObject itemPrefab)
         {
@@ -30,14 +31,14 @@ namespace Rehawk.UIFramework
         
         public IReadOnlyList<GameObject> ItemObjects
         {
-            get { return items; }
+            get { return itemObjects; }
         }
 
         public GameObject GetItemObject(int index)
         {
-            if (index >= 0 && index < items.Count)
+            if (index >= 0 && index < itemObjects.Count)
             {
-                return items[index];
+                return itemObjects[index];
             }
 
             return null;
@@ -57,7 +58,7 @@ namespace Rehawk.UIFramework
         {
             GameObject item = UIGameObjectFactory.Create(itemPrefab, root.transform);
             
-            items.Insert(index, item);
+            itemObjects.Insert(index, item);
 
             item.transform.SetSiblingIndex(index);
             item.SetActive(true);
@@ -65,31 +66,45 @@ namespace Rehawk.UIFramework
             return new ItemReport(item, true);
         }
 
-        public void RemoveItemObject(GameObject item)
+        public void DeactivateItemObject(GameObject itemObject)
         {
-            if (item == null)
+            inactiveItemObjects.Add(itemObject);
+        }
+        
+        public void RemoveInactiveItemObjects()
+        {
+            for (int i = inactiveItemObjects.Count - 1; i >= 0; i--)
+            {
+                RemoveItemObject(inactiveItemObjects[i]);
+            }
+        }
+        
+        public void RemoveAllItemObjects()
+        {
+            for (int i = itemObjects.Count - 1; i >= 0; i--)
+            {
+                RemoveItemObject(itemObjects[i]);
+            }
+        }
+        
+        private void RemoveItemObject(GameObject itemObject)
+        {
+            if (itemObject == null)
             {
                 return;
             }
             
-            int index = items.IndexOf(item);
+            int index = itemObjects.IndexOf(itemObject);
 
             if (index < 0)
             {
                 return;
             }
 
-            items.RemoveAt(index);
+            itemObjects.Remove(itemObject);
+            inactiveItemObjects.Remove(itemObject);
                 
-            UIGameObjectFactory.Destroy(item);
-        }
-
-        public void Clear()
-        {
-            for (int i = items.Count - 1; i >= 0; i--)
-            {
-                RemoveItemObject(GetItemObject(i));
-            }
+            UIGameObjectFactory.Destroy(itemObject);
         }
 
         [Serializable]

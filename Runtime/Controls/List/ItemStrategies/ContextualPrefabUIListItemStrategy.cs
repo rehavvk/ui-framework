@@ -14,8 +14,9 @@ namespace Rehawk.UIFramework
         private readonly Transform root;
         private readonly GetPrefabFunctionDelegate getItemPrefab;
         
-        private readonly List<GameObject> items = new List<GameObject>();
-        private readonly List<GameObject> itemPrefabs = new List<GameObject>();
+        private readonly List<GameObject> itemObjects = new List<GameObject>();
+        private readonly List<GameObject> inactiveItemObjects = new List<GameObject>();
+        private readonly List<GameObject> itemObjectPrefabs = new List<GameObject>();
         
         public ContextualPrefabUIListItemStrategy(Transform root, GetPrefabFunctionDelegate getItemPrefab)
         {
@@ -23,18 +24,18 @@ namespace Rehawk.UIFramework
             this.getItemPrefab = getItemPrefab;
         }
         
-        public ContextualPrefabUIListItemStrategy(Dependencies dependencies, GetPrefabFunctionDelegate getItemPrefab) : this(dependencies.itemRoot, getItemPrefab) { }
+        public ContextualPrefabUIListItemStrategy(Dependencies dependencies, GetPrefabFunctionDelegate getItemPrefab) : this(dependencies.itemObjectRoot, getItemPrefab) { }
 
         public IReadOnlyList<GameObject> ItemObjects
         {
-            get { return items; }
+            get { return itemObjects; }
         }
 
         public GameObject GetItemObject(int index)
         {
-            if (index >= 0 && index < items.Count)
+            if (index >= 0 && index < itemObjects.Count)
             {
-                return items[index];
+                return itemObjects[index];
             }
 
             return null;
@@ -43,11 +44,11 @@ namespace Rehawk.UIFramework
         public ItemReport SetItemObject(int index, object data)
         {
             GameObject oldItem = GetItemObject(index);
-            GameObject oldItemPrefab = itemPrefabs[index];
+            GameObject oldItemPrefab = itemObjectPrefabs[index];
             
-            GameObject itemPrefab = getItemPrefab.Invoke(index, data);
+            GameObject itemObjectPrefab = getItemPrefab.Invoke(index, data);
 
-            if (itemPrefab != oldItemPrefab)
+            if (itemObjectPrefab != oldItemPrefab)
             {
                 RemoveItemObject(oldItem);
                 return AddItemObject(index, data);
@@ -61,51 +62,65 @@ namespace Rehawk.UIFramework
 
         public ItemReport AddItemObject(int index, object data)
         {
-            GameObject itemPrefab = getItemPrefab.Invoke(index, data);
+            GameObject itemObjectPrefab = getItemPrefab.Invoke(index, data);
             
-            GameObject item = UIGameObjectFactory.Create(itemPrefab, root.transform);
+            GameObject itemObject = UIGameObjectFactory.Create(itemObjectPrefab, root.transform);
             
-            items.Insert(index, item);
-            itemPrefabs.Insert(index, itemPrefab);
+            itemObjects.Insert(index, itemObject);
+            itemObjectPrefabs.Insert(index, itemObjectPrefab);
 
-            item.transform.SetSiblingIndex(index);
-            item.SetActive(true);
+            itemObject.transform.SetSiblingIndex(index);
+            itemObject.SetActive(true);
 
-            return new ItemReport(item, true);
+            return new ItemReport(itemObject, true);
         }
 
-        public void RemoveItemObject(GameObject item)
+        public void DeactivateItemObject(GameObject itemObject)
         {
-            if (item == null)
+            inactiveItemObjects.Add(itemObject);
+        }
+        
+        public void RemoveInactiveItemObjects()
+        {
+            for (int i = inactiveItemObjects.Count - 1; i >= 0; i--)
+            {
+                RemoveItemObject(inactiveItemObjects[i]);
+            }
+        }
+        
+        public void RemoveAllItemObjects()
+        {
+            for (int i = itemObjects.Count - 1; i >= 0; i--)
+            {
+                RemoveItemObject(itemObjects[i]);
+            }
+        }
+        
+        private void RemoveItemObject(GameObject itemObject)
+        {
+            if (itemObject == null)
             {
                 return;
             }
             
-            int index = items.IndexOf(item);
+            int index = itemObjects.IndexOf(itemObject);
 
             if (index < 0)
             {
                 return;
             }
 
-            items.RemoveAt(index);
-            itemPrefabs.RemoveAt(index);
+            itemObjects.Remove(itemObject);
+            inactiveItemObjects.Remove(itemObject);
+            itemObjectPrefabs.RemoveAt(index);
                 
-            UIGameObjectFactory.Destroy(item);
+            UIGameObjectFactory.Destroy(itemObject);
         }
 
-        public void Clear()
-        {
-            for (int i = items.Count - 1; i >= 0; i--)
-            {
-                RemoveItemObject(GetItemObject(i));
-            }
-        }
-        
         [Serializable]
         public class Dependencies
         {
-            public Transform itemRoot;
+            public Transform itemObjectRoot;
         }
     }
 }

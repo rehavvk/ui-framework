@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Rehawk.UIFramework
 {
@@ -10,33 +11,34 @@ namespace Rehawk.UIFramework
     /// </summary>
     public class PredefinedUIListItemStrategy : IUIListItemStrategy
     {
-        private readonly List<GameObject> items = new List<GameObject>();
-        private readonly List<GameObject> newItems = new List<GameObject>();
-        private readonly List<GameObject> emptyItems = new List<GameObject>();
-        private readonly Queue<GameObject> emptyItemsQueue = new Queue<GameObject>();
+        private readonly List<GameObject> itemObjects = new List<GameObject>();
+        private readonly List<GameObject> newItemObjects = new List<GameObject>();
+        private readonly List<GameObject> inactiveItemObjects = new List<GameObject>();
+        private readonly List<GameObject> emptyItemObjects = new List<GameObject>();
+        private readonly Queue<GameObject> emptyItemObjectsQueue = new Queue<GameObject>();
 
         private bool keepEmptyActive;
         
-        public PredefinedUIListItemStrategy(GameObject[] items)
+        public PredefinedUIListItemStrategy(GameObject[] itemObjects)
         {
-            this.items.AddRange(items);
-            newItems.AddRange(items);
-            emptyItems.AddRange(items);
+            this.itemObjects.AddRange(itemObjects);
+            newItemObjects.AddRange(itemObjects);
+            emptyItemObjects.AddRange(itemObjects);
             
-            for (int i = 0; i < this.items.Count; i++)
+            for (int i = 0; i < this.itemObjects.Count; i++)
             {
-                GameObject item = this.items[i];
+                GameObject item = this.itemObjects[i];
                 
                 item.SetActive(KeepEmptyActive);
-                emptyItemsQueue.Enqueue(item);
+                emptyItemObjectsQueue.Enqueue(item);
             }
         }
         
-        public PredefinedUIListItemStrategy(Dependencies dependencies) : this(dependencies.items) { }
+        public PredefinedUIListItemStrategy(Dependencies dependencies) : this(dependencies.itemObjects) { }
 
         public IReadOnlyList<GameObject> ItemObjects
         {
-            get { return items; }
+            get { return itemObjects; }
         }
 
         public bool KeepEmptyActive
@@ -46,9 +48,9 @@ namespace Rehawk.UIFramework
             {
                 keepEmptyActive = value;
                 
-                for (int i = 0; i < emptyItems.Count; i++)
+                for (int i = 0; i < emptyItemObjects.Count; i++)
                 {
-                    GameObject item = emptyItems[i];
+                    GameObject item = emptyItemObjects[i];
                 
                     item.SetActive(KeepEmptyActive);
                 }
@@ -57,9 +59,9 @@ namespace Rehawk.UIFramework
 
         public GameObject GetItemObject(int index)
         {
-            if (index >= 0 && index < items.Count)
+            if (index >= 0 && index < itemObjects.Count)
             {
-                return items[index];
+                return itemObjects[index];
             }
 
             return null;
@@ -79,12 +81,12 @@ namespace Rehawk.UIFramework
         {
             ItemReport addReport;
             
-            if (emptyItemsQueue.Count > 0)
+            if (emptyItemObjectsQueue.Count > 0)
             {
-                GameObject item = emptyItemsQueue.Dequeue();
-                emptyItems.Remove(item);
+                GameObject item = emptyItemObjectsQueue.Dequeue();
+                emptyItemObjects.Remove(item);
 
-                bool isNew = newItems.Remove(item);
+                bool isNew = newItemObjects.Remove(item);
                 
                 item.SetActive(true);
                 
@@ -99,37 +101,51 @@ namespace Rehawk.UIFramework
             return addReport;
         }
 
-        public void RemoveItemObject(GameObject item)
+        public void DeactivateItemObject(GameObject itemObject)
         {
-            if (item == null)
+            inactiveItemObjects.Add(itemObject);
+        }
+        
+        public void RemoveInactiveItemObjects()
+        {
+            for (int i = inactiveItemObjects.Count - 1; i >= 0; i--)
+            {
+                RemoveItemObject(inactiveItemObjects[i]);
+            }
+        }
+        
+        public void RemoveAllItemObjects()
+        {
+            for (int i = itemObjects.Count - 1; i >= 0; i--)
+            {
+                RemoveItemObject(itemObjects[i]);
+            }
+        }
+        
+        private void RemoveItemObject(GameObject itemObject)
+        {
+            if (itemObject == null)
             {
                 return;
             }
             
-            int index = items.IndexOf(item);
+            int index = itemObjects.IndexOf(itemObject);
 
             if (index < 0)
             {
                 return;
             }
 
-            item.SetActive(KeepEmptyActive);
-            emptyItemsQueue.Enqueue(item);
-            emptyItems.Add(item);
-        }
-
-        public void Clear()
-        {
-            for (int i = items.Count - 1; i >= 0; i--)
-            {
-                RemoveItemObject(GetItemObject(i));
-            }
+            itemObject.SetActive(KeepEmptyActive);
+            emptyItemObjectsQueue.Enqueue(itemObject);
+            emptyItemObjects.Add(itemObject);
         }
 
         [Serializable]
         public class Dependencies
         {
-            public GameObject[] items;
+            [FormerlySerializedAs("items")]
+            public GameObject[] itemObjects;
         }
     }
 }

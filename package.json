@@ -1,6 +1,6 @@
 {
   "name": "com.rehawk.ui-framework",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "displayName": "UI Framework",
   "description": "Flexible UI framework designed specifically for the Unity Engine. The framework leverages the efficiency and elegance of member expressions to enable data binding, providing a seamless way to connect UI elements to underlying data models.",
   "unity": "2020.1",

@@ -5,8 +5,6 @@ using UnityEngine;
 
 namespace Rehawk.UIFramework
 {
-    // TODO: RefreshItems is still a little bit wonky. A smarter algorithm would be nice to keep unchanged items unchanged. 
-    
     public class UIList : UIListBase
     {
         private IUIListItemStrategy itemStrategy;
@@ -70,7 +68,7 @@ namespace Rehawk.UIFramework
         {
             base.OnDestroy();
             
-            itemStrategy.Clear();
+            itemStrategy.RemoveAllItemObjects();
         }
 
         public override void SetItemStrategy(IUIListItemStrategy itemStrategy)
@@ -171,7 +169,7 @@ namespace Rehawk.UIFramework
                 else
                 {
                     InvokeCallback(UIListItemCallback.Deactivated, i, item, oldData);
-                    itemStrategy.RemoveItemObject(item);
+                    itemStrategy.DeactivateItemObject(item);
                 }
             }
             
@@ -196,6 +194,8 @@ namespace Rehawk.UIFramework
                     InvokeCallback(UIListItemCallback.Activated, i, report.Object, data);
                 }
             }
+
+            itemStrategy.RemoveInactiveItemObjects();
 
             datasets.Clear();
             datasets.AddRange(newDatasets);
