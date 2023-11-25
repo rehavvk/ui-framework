@@ -11,26 +11,24 @@ namespace Rehawk.UIFramework
     /// </summary>
     public class PredefinedUIListItemStrategy : IUIListItemStrategy
     {
-        private readonly List<GameObject> itemObjects = new List<GameObject>();
-        private readonly List<GameObject> newItemObjects = new List<GameObject>();
+        private readonly List<GameObject> activeItemObjects = new List<GameObject>();
+        private readonly List<GameObject> freshItemObjects = new List<GameObject>();
         private readonly List<GameObject> inactiveItemObjects = new List<GameObject>();
-        private readonly List<GameObject> emptyItemObjects = new List<GameObject>();
-        private readonly Queue<GameObject> emptyItemObjectsQueue = new Queue<GameObject>();
+        private readonly Queue<GameObject> inactiveItemObjectsQueue = new Queue<GameObject>();
 
         private bool keepEmptyActive;
         
         public PredefinedUIListItemStrategy(GameObject[] itemObjects)
         {
-            this.itemObjects.AddRange(itemObjects);
-            newItemObjects.AddRange(itemObjects);
-            emptyItemObjects.AddRange(itemObjects);
+            freshItemObjects.AddRange(itemObjects);
+            inactiveItemObjects.AddRange(itemObjects);
             
-            for (int i = 0; i < this.itemObjects.Count; i++)
+            for (int i = 0; i < itemObjects.Length; i++)
             {
-                GameObject item = this.itemObjects[i];
+                GameObject item = itemObjects[i];
                 
                 item.SetActive(KeepEmptyActive);
-                emptyItemObjectsQueue.Enqueue(item);
+                inactiveItemObjectsQueue.Enqueue(item);
             }
         }
         
@@ -38,7 +36,7 @@ namespace Rehawk.UIFramework
 
         public IReadOnlyList<GameObject> ItemObjects
         {
-            get { return itemObjects; }
+            get { return activeItemObjects; }
         }
 
         public bool KeepEmptyActive
@@ -48,9 +46,9 @@ namespace Rehawk.UIFramework
             {
                 keepEmptyActive = value;
                 
-                for (int i = 0; i < emptyItemObjects.Count; i++)
+                for (int i = 0; i < inactiveItemObjects.Count; i++)
                 {
-                    GameObject item = emptyItemObjects[i];
+                    GameObject item = inactiveItemObjects[i];
                 
                     item.SetActive(KeepEmptyActive);
                 }
@@ -59,9 +57,9 @@ namespace Rehawk.UIFramework
 
         public GameObject GetItemObject(int index)
         {
-            if (index >= 0 && index < itemObjects.Count)
+            if (index >= 0 && index < activeItemObjects.Count)
             {
-                return itemObjects[index];
+                return activeItemObjects[index];
             }
 
             return null;
@@ -71,7 +69,6 @@ namespace Rehawk.UIFramework
         {
             GameObject item = GetItemObject(index);
             
-            item.transform.SetSiblingIndex(index);
             item.SetActive(true);
 
             return new ItemReport(item, false);
@@ -81,12 +78,12 @@ namespace Rehawk.UIFramework
         {
             ItemReport addReport;
             
-            if (emptyItemObjectsQueue.Count > 0)
+            if (inactiveItemObjectsQueue.Count > 0)
             {
-                GameObject item = emptyItemObjectsQueue.Dequeue();
-                emptyItemObjects.Remove(item);
+                GameObject item = inactiveItemObjectsQueue.Dequeue();
+                inactiveItemObjects.Remove(item);
 
-                bool isNew = newItemObjects.Remove(item);
+                bool isNew = freshItemObjects.Remove(item);
                 
                 item.SetActive(true);
                 
@@ -95,7 +92,7 @@ namespace Rehawk.UIFramework
             else
             {
                 addReport = new ItemReport(null, false);
-                Debug.LogError($"<b>{nameof(PredefinedUIListItemStrategy)}:</b> Amount of predefined items exceeded.");
+                Debug.LogError($"<b>{nameof(PredefinedUIListItemStrategy)}:</b> Amount of predefined item objects exceeded.");
             }
 
             return addReport;
@@ -103,6 +100,7 @@ namespace Rehawk.UIFramework
 
         public void DeactivateItemObject(GameObject itemObject)
         {
+            activeItemObjects.Remove(itemObject);
             inactiveItemObjects.Add(itemObject);
         }
         
@@ -116,29 +114,21 @@ namespace Rehawk.UIFramework
         
         public void RemoveAllItemObjects()
         {
-            for (int i = itemObjects.Count - 1; i >= 0; i--)
+            for (int i = activeItemObjects.Count - 1; i >= 0; i--)
             {
-                RemoveItemObject(itemObjects[i]);
+                RemoveItemObject(activeItemObjects[i]);
             }
         }
         
         private void RemoveItemObject(GameObject itemObject)
         {
-            if (itemObject == null)
+            if (itemObject == null || !inactiveItemObjects.Contains(itemObject))
             {
                 return;
             }
             
-            int index = itemObjects.IndexOf(itemObject);
-
-            if (index < 0)
-            {
-                return;
-            }
-
             itemObject.SetActive(KeepEmptyActive);
-            emptyItemObjectsQueue.Enqueue(itemObject);
-            emptyItemObjects.Add(itemObject);
+            inactiveItemObjectsQueue.Enqueue(itemObject);
         }
 
         [Serializable]
