@@ -48,9 +48,9 @@ namespace Rehawk.UIFramework
                 
                 for (int i = 0; i < inactiveItemObjects.Count; i++)
                 {
-                    GameObject item = inactiveItemObjects[i];
+                    GameObject itemObject = inactiveItemObjects[i];
                 
-                    item.SetActive(KeepEmptyActive);
+                    itemObject.SetActive(KeepEmptyActive);
                 }
             }
         }
@@ -67,11 +67,12 @@ namespace Rehawk.UIFramework
         
         public ItemReport SetItemObject(int index, object data)
         {
-            GameObject item = GetItemObject(index);
+            GameObject itemObject = GetItemObject(index);
+            activeItemObjects.Add(itemObject);
             
-            item.SetActive(true);
-
-            return new ItemReport(item, false);
+            itemObject.SetActive(true);
+            
+            return new ItemReport(itemObject, false);
         }
 
         public ItemReport AddItemObject(int index, object data)
@@ -80,14 +81,15 @@ namespace Rehawk.UIFramework
             
             if (inactiveItemObjectsQueue.Count > 0)
             {
-                GameObject item = inactiveItemObjectsQueue.Dequeue();
-                inactiveItemObjects.Remove(item);
+                GameObject itemObject = inactiveItemObjectsQueue.Dequeue();
+                inactiveItemObjects.Remove(itemObject);
 
-                bool isNew = freshItemObjects.Remove(item);
+                bool isNew = freshItemObjects.Remove(itemObject);
+                activeItemObjects.Add(itemObject);
                 
-                item.SetActive(true);
+                itemObject.SetActive(true);
                 
-                addReport = new ItemReport(item, isNew);
+                addReport = new ItemReport(itemObject, isNew);
             }
             else
             {

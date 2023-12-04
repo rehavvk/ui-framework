@@ -43,21 +43,21 @@ namespace Rehawk.UIFramework
         
         public ItemReport SetItemObject(int index, object data)
         {
-            GameObject oldItem = GetItemObject(index);
+            GameObject oldItemObject = GetItemObject(index);
             GameObject oldItemPrefab = itemObjectPrefabs[index];
             
             GameObject itemObjectPrefab = getItemPrefab.Invoke(index, data);
 
             if (itemObjectPrefab != oldItemPrefab)
             {
-                RemoveItemObject(oldItem);
+                RemoveItemObject(oldItemObject);
                 return AddItemObject(index, data);
             }
             
-            oldItem.transform.SetSiblingIndex(index);
-            oldItem.SetActive(true);
+            oldItemObject.transform.SetSiblingIndex(index);
+            oldItemObject.SetActive(true);
 
-            return new ItemReport(oldItem, false);
+            return new ItemReport(oldItemObject, false);
         }
 
         public ItemReport AddItemObject(int index, object data)
