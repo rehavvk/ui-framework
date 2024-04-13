@@ -15,7 +15,6 @@ namespace Rehawk.UIFramework
         [SubclassSelector]
         [SerializeReference] private VisibilityStrategyBase visibilityStrategy;
         
-        private bool isInitialized;
         private bool wasPreviousVisible;
         
         private UIPanel parentUIPanel;
@@ -103,7 +102,7 @@ namespace Rehawk.UIFramework
         
         private void HandleVisibilityChange()
         {
-            if (!isInitialized || wasPreviousVisible == IsVisible)
+            if (wasPreviousVisible == IsVisible)
                 return;
             
             if (IsVisible)

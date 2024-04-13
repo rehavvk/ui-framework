@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Rehawk.UIFramework
 {
@@ -11,24 +10,24 @@ namespace Rehawk.UIFramework
     /// </summary>
     public class PredefinedUIListItemStrategy : IUIListItemStrategy
     {
-        private readonly List<GameObject> activeItemObjects = new List<GameObject>();
+        private readonly List<GameObject> itemObjects = new List<GameObject>();
         private readonly List<GameObject> freshItemObjects = new List<GameObject>();
         private readonly List<GameObject> inactiveItemObjects = new List<GameObject>();
-        private readonly Queue<GameObject> inactiveItemObjectsQueue = new Queue<GameObject>();
+        private readonly List<GameObject> activeItemObjects = new List<GameObject>();
 
         private bool keepEmptyActive;
         
-        public PredefinedUIListItemStrategy(GameObject[] itemObjects)
+        public PredefinedUIListItemStrategy(IReadOnlyList<GameObject> itemObjects)
         {
+            this.itemObjects.AddRange(itemObjects);
             freshItemObjects.AddRange(itemObjects);
             inactiveItemObjects.AddRange(itemObjects);
             
-            for (int i = 0; i < itemObjects.Length; i++)
+            for (int i = 0; i < itemObjects.Count; i++)
             {
                 GameObject item = itemObjects[i];
                 
                 item.SetActive(KeepEmptyActive);
-                inactiveItemObjectsQueue.Enqueue(item);
             }
         }
         
@@ -57,9 +56,9 @@ namespace Rehawk.UIFramework
 
         public GameObject GetItemObject(int index)
         {
-            if (index >= 0 && index < activeItemObjects.Count)
+            if (index >= 0 && index < itemObjects.Count)
             {
-                return activeItemObjects[index];
+                return itemObjects[index];
             }
 
             return null;
@@ -67,74 +66,71 @@ namespace Rehawk.UIFramework
         
         public ItemReport SetItemObject(int index, object data)
         {
-            GameObject item = GetItemObject(index);
-            
-            item.SetActive(true);
-
-            return new ItemReport(item, false);
-        }
-
-        public ItemReport AddItemObject(int index, object data)
-        {
             ItemReport addReport;
-            
-            if (inactiveItemObjectsQueue.Count > 0)
-            {
-                GameObject item = inactiveItemObjectsQueue.Dequeue();
-                inactiveItemObjects.Remove(item);
 
-                bool isNew = freshItemObjects.Remove(item);
+            if (index >= 0 && index < itemObjects.Count)
+            {
+                GameObject itemObject = GetItemObject(index);
+                inactiveItemObjects.Remove(itemObject);
+
+                if (!activeItemObjects.Contains(itemObject))
+                {
+                    activeItemObjects.Add(itemObject);
+                }
+            
+                bool isNew = freshItemObjects.Remove(itemObject);
+
+                itemObject.SetActive(true);
                 
-                item.SetActive(true);
-                
-                addReport = new ItemReport(item, isNew);
+                addReport = new ItemReport(itemObject, isNew);
             }
             else
             {
                 addReport = new ItemReport(null, false);
-                Debug.LogError($"<b>{nameof(PredefinedUIListItemStrategy)}:</b> Amount of predefined item objects exceeded.");
+                Debug.LogError($"<b>{nameof(PredefinedUIListItemStrategy)}:</b> Index is outside of predefined item object range. [index={index}]");
             }
-
+            
             return addReport;
+        }
+
+        public ItemReport AddItemObject(int index, object data)
+        {
+            return SetItemObject(index, data);
         }
 
         public void DeactivateItemObject(GameObject itemObject)
         {
+            if (itemObject == null || !itemObjects.Contains(itemObject) || inactiveItemObjects.Contains(itemObject))
+            {
+                return;
+            }
+
+            itemObject.SetActive(KeepEmptyActive);
             activeItemObjects.Remove(itemObject);
             inactiveItemObjects.Add(itemObject);
         }
         
         public void RemoveInactiveItemObjects()
         {
-            for (int i = inactiveItemObjects.Count - 1; i >= 0; i--)
-            {
-                RemoveItemObject(inactiveItemObjects[i]);
-            }
+            // TODO: Nothing todo, they are already inactive and will not get destroyed.
         }
         
         public void RemoveAllItemObjects()
         {
-            for (int i = activeItemObjects.Count - 1; i >= 0; i--)
+            for (int i = itemObjects.Count - 1; i >= 0; i--)
             {
-                RemoveItemObject(activeItemObjects[i]);
+                RemoveItemObject(itemObjects[i]);
             }
         }
         
         private void RemoveItemObject(GameObject itemObject)
         {
-            if (itemObject == null || !inactiveItemObjects.Contains(itemObject))
-            {
-                return;
-            }
-            
-            itemObject.SetActive(KeepEmptyActive);
-            inactiveItemObjectsQueue.Enqueue(itemObject);
+            DeactivateItemObject(itemObject);
         }
 
         [Serializable]
         public class Dependencies
         {
-            [FormerlySerializedAs("items")]
             public GameObject[] itemObjects;
         }
     }

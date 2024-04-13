@@ -1,4 +1,6 @@
-﻿namespace Rehawk.UIFramework
+﻿using UnityEngine;
+
+namespace Rehawk.UIFramework
 {
     public abstract class UIElementBase : UIControlBase
     {

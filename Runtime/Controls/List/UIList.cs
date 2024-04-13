@@ -1,17 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using UnityEngine;
 
 namespace Rehawk.UIFramework
 {
     public class UIList : UIListBase
     {
-        private IUIListItemStrategy itemStrategy;
-        private Type itemReceiverType;
-        
         private readonly List<object> datasets = new List<object>();
         private readonly List<object> newDatasets = new List<object>();
+        
+        private IUIListItemStrategy itemStrategy;
+        private Type itemReceiverType;
         
         private IEnumerable items;
         private int count;
@@ -41,9 +42,6 @@ namespace Rehawk.UIFramework
                 count = newCount;
                 
                 RefreshItems();
-                
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(Count));
             }
         }
 
@@ -200,6 +198,9 @@ namespace Rehawk.UIFramework
             datasets.Clear();
             datasets.AddRange(newDatasets);
             newDatasets.Clear();
+            
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(Count));
         }
 
         private void InformListItemReceiver(GameObject item, int index, object data)

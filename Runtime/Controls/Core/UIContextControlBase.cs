@@ -118,6 +118,11 @@ namespace Rehawk.UIFramework
             get { return castedContext; }
         }
 
+        public Type ContextBaseType
+        {
+            get { return typeof(T); }
+        }
+        
         protected override void AfterContextChanged()
         {
             base.AfterContextChanged();
