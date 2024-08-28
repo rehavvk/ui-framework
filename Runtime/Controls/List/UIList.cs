@@ -192,6 +192,22 @@ namespace Rehawk.UIFramework
                     InvokeCallback(UIListItemCallback.Activated, i, report.Object, data);
                 }
             }
+            else if (itemStrategy.ItemObjects.Count > Count)
+            {
+                for (int i = itemStrategy.ItemObjects.Count - 1; i >= Count; i--)
+                {
+                    object oldData = null;
+                    if (i >= 0 && i < datasets.Count)
+                    {
+                        oldData = datasets[i];
+                    }
+                    
+                    GameObject item = itemStrategy.GetItemObject(i);
+
+                    InvokeCallback(UIListItemCallback.Deactivated, i, item, oldData);
+                    itemStrategy.DeactivateItemObject(item);
+                }
+            }
 
             itemStrategy.RemoveInactiveItemObjects();
 
