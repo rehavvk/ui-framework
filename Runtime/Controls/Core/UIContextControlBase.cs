@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using UnityEngine;
 
 namespace Rehawk.UIFramework
@@ -7,8 +6,6 @@ namespace Rehawk.UIFramework
     public abstract class UIContextControlBase : UIControlBase
     {
         private object context;
-
-        private bool isInitialized;
         
         public event Action ContextChanged;
 
@@ -20,13 +17,6 @@ namespace Rehawk.UIFramework
         public object RawContext
         {
             get { return context; }
-        }
-
-        protected override void Start()
-        {
-            base.Start();
-
-            isInitialized = true;
         }
 
         public T GetContext<T>()
@@ -55,42 +45,19 @@ namespace Rehawk.UIFramework
         public void SetContext<T>(T context)
         {
             BeforeContextChanged();
-            UnLinkINotifyPropertyChanged();
             
             this.context = context;
 
-            LinkINotifyPropertyChanged();
             AfterContextChanged();
 
-            EvaluateBindings();
+            SetDirty();
 
-            if (isInitialized)
-            {
-                SetDirty();
-            }
-            
             ContextChanged?.Invoke();
         }
 
         public void ClearContext()
         {
             SetContext<object>(null);
-        }
-
-        private void LinkINotifyPropertyChanged()
-        {
-            if (context is INotifyPropertyChanged notifyPropertyChanged)
-            {
-                notifyPropertyChanged.PropertyChanged += OnContextPropertyChanged;
-            }
-        }
-
-        private void UnLinkINotifyPropertyChanged()
-        {
-            if (context is INotifyPropertyChanged notifyPropertyChanged)
-            {
-                notifyPropertyChanged.PropertyChanged -= OnContextPropertyChanged;
-            }
         }
 
         /// <summary>
@@ -102,11 +69,6 @@ namespace Rehawk.UIFramework
         /// Is called after the context is switched to another instance or cleared.
         /// </summary>
         protected virtual void AfterContextChanged() {}
-        
-        private void OnContextPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            SetDirty();
-        }
     }
     
     public abstract class UIContextControlBase<T> : UIContextControlBase

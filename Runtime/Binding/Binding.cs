@@ -7,15 +7,15 @@ namespace Rehawk.UIFramework
 {
     public class Binding
     {
-        private readonly object parent;
-        
         private IBindingStrategy sourceStrategy;
         private IBindingStrategy destinationStrategy;
         
         private IValueConverter converter;
         private BindingDirection direction;
 
+        private readonly object parent;
         private readonly List<IBindingConnection> connections = new List<IBindingConnection>();
+        private readonly List<string> tags = new List<string>();
 
         public event Action<EvaluationDirection> Evaluated;
             
@@ -27,6 +27,11 @@ namespace Rehawk.UIFramework
         internal object Parent
         {
             get { return parent; }
+        }
+
+        internal IReadOnlyList<string> Tags
+        {
+            get { return tags; }
         }
 
         internal IBindingStrategy SourceStrategy
@@ -43,7 +48,7 @@ namespace Rehawk.UIFramework
         {
             get { return converter; }
         }
-
+        
         internal void Release()
         {
             if (sourceStrategy != null)
@@ -166,6 +171,11 @@ namespace Rehawk.UIFramework
             };
             
             connections.Add(connectedProperty);
+        }
+
+        internal void AddTags(params string[] tags)
+        {
+            this.tags.AddRange(tags);
         }
 
         private void OnSourceGotDirty()

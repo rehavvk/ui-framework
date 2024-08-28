@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -76,7 +77,7 @@ namespace Rehawk.UIFramework
         private void SetupBindingsInternal()
         {
             SetupBindings();
-            EvaluateBindings();
+            SetDirty();
         }
         
         protected virtual void SetupBindings() { }
@@ -125,9 +126,9 @@ namespace Rehawk.UIFramework
             
             return binding;
         }
-
-        [ContextMenu("Evaluate Bindings")]
-        protected void EvaluateBindings()
+        
+        [ContextMenu("Set Dirty")]
+        public void SetDirty()
         {
             for (int i = 0; i < bindings.Count; i++)
             {
@@ -136,6 +137,21 @@ namespace Rehawk.UIFramework
             }
         }
 
+        protected void SetDirty(params string[] tags)
+        {
+            for (int i = 0; i < bindings.Count; i++)
+            {
+                if (bindings[i].Tags.Any(tag => tags.Contains(tag)))
+                {
+                    bindings[i].Evaluate();
+                    bindings[i].SourceToDestination();
+                }
+            }
+        }
+
+        protected virtual void OnPanelBecameVisible() {}
+        protected virtual void OnPanelBecameInvisible() {}
+        
         private void ReleaseBindings()
         {
             for (int i = 0; i < bindings.Count; i++)
@@ -144,19 +160,8 @@ namespace Rehawk.UIFramework
             }
         }
 
-        public virtual void SetDirty()
-        {
-            OnRefresh();
-        }
-
-        protected virtual void OnRefresh() {}
-        
-        protected virtual void OnPanelBecameVisible() {}
-        protected virtual void OnPanelBecameInvisible() {}
-        
         private void OnPanelBecameVisible(UIPanel panel)
         {
-            SetDirty();
             OnPanelBecameVisible();
         }
 

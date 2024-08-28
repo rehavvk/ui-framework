@@ -66,7 +66,7 @@ namespace Rehawk.UIFramework
         {
             base.OnDestroy();
             
-            itemStrategy.RemoveAllItemObjects();
+            itemStrategy?.RemoveAllItemObjects();
         }
 
         public override void SetItemStrategy(IUIListItemStrategy itemStrategy)

@@ -17,8 +17,10 @@ namespace Rehawk.UIFramework
 
         private bool keepEmptyActive;
         
-        public PredefinedUIListItemStrategy(IReadOnlyList<GameObject> itemObjects)
+        public PredefinedUIListItemStrategy(IReadOnlyList<GameObject> itemObjects, bool keepEmptyActive)
         {
+            this.keepEmptyActive = keepEmptyActive;
+
             this.itemObjects.AddRange(itemObjects);
             freshItemObjects.AddRange(itemObjects);
             inactiveItemObjects.AddRange(itemObjects);
@@ -31,7 +33,7 @@ namespace Rehawk.UIFramework
             }
         }
         
-        public PredefinedUIListItemStrategy(Dependencies dependencies) : this(dependencies.itemObjects) { }
+        public PredefinedUIListItemStrategy(Dependencies dependencies) : this(dependencies.itemObjects, dependencies.keepEmptyActive) { }
 
         public IReadOnlyList<GameObject> ItemObjects
         {
@@ -131,6 +133,7 @@ namespace Rehawk.UIFramework
         [Serializable]
         public class Dependencies
         {
+            public bool keepEmptyActive;
             public GameObject[] itemObjects;
         }
     }
