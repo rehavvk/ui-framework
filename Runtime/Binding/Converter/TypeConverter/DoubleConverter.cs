@@ -11,7 +11,7 @@ namespace Rehawk.UIFramework
                 return result;
             }
 
-            return 0f;
+            return 0;
         }
 
         public object ConvertBack(object value)

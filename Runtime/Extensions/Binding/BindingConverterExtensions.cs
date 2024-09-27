@@ -35,9 +35,9 @@ namespace Rehawk.UIFramework
             });
         }
 
-        public static Binding ConvertToBool(this Binding binding)
+        public static Binding ConvertToBool(this Binding binding, bool invert = false)
         {
-            return binding.ConvertBy(new BoolConverter());
+            return binding.ConvertBy(new BoolConverter(invert));
         }
 
         public static Binding ConvertToInt(this Binding binding)
@@ -70,11 +70,6 @@ namespace Rehawk.UIFramework
             return binding.ConvertBy(new DateTimeToStringConverter(format));
         }
 
-        public static Binding ConvertToInvertedBool(this Binding binding)
-        {
-            return binding.ConvertBy(new InvertedBoolConverter());
-        }
-        
         public static Binding ConvertBy(this Binding binding, IValueConverter converter) 
         {
             MultiConverterHelper.AddConverter(binding, converter);
