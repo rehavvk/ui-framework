@@ -9,7 +9,18 @@ using UnityEngine.EventSystems;
 
 namespace Rehawk.UIFramework
 {
-    public abstract class UIControlBase : UIBehaviour, INotifyPropertyChanged
+    public interface IUIControl : INotifyPropertyChanged
+    {
+        Binding Bind<T>(Expression<Func<T>> memberExpression, BindingDirection direction = BindingDirection.OneWay);
+        Binding BindProperty(Func<object> getContext, string propertyName, BindingDirection direction = BindingDirection.OneWay);
+        Binding BindContext(Func<UIContextControlBase> getControlCallback, BindingDirection direction = BindingDirection.OneWay);
+        Binding BindCallback<T>(Action<T> setCallback);
+        Binding BindCallback<T>(Func<T> getCallback, Action<T> setCallback);
+        
+        void SetDirty();
+    }
+    
+    public abstract class UIControlBase : UIBehaviour, IUIControl, INotifyPropertyChanged
     {
         private UIPanel parentPanel;
         
@@ -17,6 +28,7 @@ namespace Rehawk.UIFramework
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        [Obsolete("Will be removed in future releases. Use your own serialized field to define the panel instead.")]
         public UIPanel ParentPanel
         {
             get { return parentPanel; }
@@ -149,8 +161,8 @@ namespace Rehawk.UIFramework
             }
         }
 
-        protected virtual void OnPanelBecameVisible() {}
-        protected virtual void OnPanelBecameInvisible() {}
+        protected virtual void OnBecameVisible() {}
+        protected virtual void OnBecameInvisible() {}
         
         private void ReleaseBindings()
         {
@@ -162,12 +174,12 @@ namespace Rehawk.UIFramework
 
         private void OnPanelBecameVisible(UIPanel panel)
         {
-            OnPanelBecameVisible();
+            OnBecameVisible();
         }
 
         private void OnPanelBecameInvisible(UIPanel panel)
         {
-            OnPanelBecameInvisible();
+            OnBecameInvisible();
         }
         
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

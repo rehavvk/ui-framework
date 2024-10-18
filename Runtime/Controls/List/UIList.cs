@@ -221,20 +221,20 @@ namespace Rehawk.UIFramework
 
         private void InformListItemReceiver(GameObject item, int index, object data)
         {
-            Type itemReceiverType = this.itemReceiverType;
-                        
-            if (itemReceiverType == null)
+            if (itemReceiverType != null)
             {
-                itemReceiverType = typeof(IUIListItemReceiver);
+                if (item.TryGetComponent(itemReceiverType, out Component itemReceiverComponent) && itemReceiverComponent is IUIListItemReceiver itemReceiver)
+                {
+                    itemReceiver.SetListItem(new ListItem(index, data));
+                    return;
+                }
+                
+                Debug.LogError($"No item receiver has been found. [requestedItemReceiver={itemReceiverType}]", item);
             }
-                        
-            if (item.TryGetComponent(itemReceiverType, out Component itemReceiverComponent) && itemReceiverComponent is IUIListItemReceiver itemReceiver)
+            else if (item.TryGetComponent(out IUIListItemReceiver itemReceiver))
             {
                 itemReceiver.SetListItem(new ListItem(index, data));
-            }
-            else if (this.itemReceiverType != null)
-            {
-                Debug.LogError($"No fitting item receiver has been found. [requestedItemReceiver={this.itemReceiverType}]", item);
+                Debug.LogWarning($"No item receiver has been setup. First other item receiver was used. [usedItemReceiver={itemReceiver.GetType()}]", item);
             }
         }
     }

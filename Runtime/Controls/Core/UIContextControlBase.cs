@@ -3,7 +3,20 @@ using UnityEngine;
 
 namespace Rehawk.UIFramework
 {
-    public abstract class UIContextControlBase : UIControlBase
+    public interface IUIContextControl : IUIControl
+    {
+        event Action ContextChanged;
+        
+        bool HasContext { get; }
+        object RawContext { get; }
+
+        T GetContext<T>();
+        bool TryGetContext<T>(out T context);
+        void SetContext<T>(T context);
+        void ClearContext();
+    }
+    
+    public abstract class UIContextControlBase : UIControlBase, IUIContextControl
     {
         private object context;
         
@@ -71,7 +84,13 @@ namespace Rehawk.UIFramework
         protected virtual void AfterContextChanged() {}
     }
     
-    public abstract class UIContextControlBase<T> : UIContextControlBase
+    public interface IUIContextControl<out T> : IUIContextControl
+    {
+        T Context { get; }
+        Type ContextBaseType { get; }
+    } 
+    
+    public abstract class UIContextControlBase<T> : UIContextControlBase, IUIContextControl<T>
     {
         private T castedContext;
 
