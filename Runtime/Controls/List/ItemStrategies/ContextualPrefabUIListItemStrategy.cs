@@ -64,7 +64,7 @@ namespace Rehawk.UIFramework
         {
             GameObject itemObjectPrefab = getItemPrefab.Invoke(index, data);
             
-            GameObject itemObject = UIGameObjectFactory.Create(itemObjectPrefab, root.transform);
+            GameObject itemObject = UIGameObjectFactory.Get(itemObjectPrefab, root.transform);
             
             itemObjects.Insert(index, itemObject);
             itemObjectPrefabs.Insert(index, itemObjectPrefab);
@@ -114,7 +114,7 @@ namespace Rehawk.UIFramework
             inactiveItemObjects.Remove(itemObject);
             itemObjectPrefabs.RemoveAt(index);
                 
-            UIGameObjectFactory.Destroy(itemObject);
+            UIGameObjectFactory.Return(itemObject);
         }
 
         [Serializable]

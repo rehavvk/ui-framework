@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using UnityEngine;
 
 namespace Rehawk.UIFramework
@@ -166,6 +165,8 @@ namespace Rehawk.UIFramework
                 }
                 else
                 {
+                    InformListItemReceiver(item, i, null);
+                    
                     InvokeCallback(UIListItemCallback.Deactivated, i, item, oldData);
                     itemStrategy.DeactivateItemObject(item);
                 }
@@ -203,7 +204,8 @@ namespace Rehawk.UIFramework
                     }
                     
                     GameObject item = itemStrategy.GetItemObject(i);
-
+                    InformListItemReceiver(item, i, null);
+                    
                     InvokeCallback(UIListItemCallback.Deactivated, i, item, oldData);
                     itemStrategy.DeactivateItemObject(item);
                 }

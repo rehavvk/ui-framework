@@ -56,7 +56,7 @@ namespace Rehawk.UIFramework
 
         public ItemReport AddItemObject(int index, object data)
         {
-            GameObject itemObject = UIGameObjectFactory.Create(itemPrefab, root.transform);
+            GameObject itemObject = UIGameObjectFactory.Get(itemPrefab, root.transform);
             
             itemObjects.Insert(index, itemObject);
 
@@ -104,7 +104,7 @@ namespace Rehawk.UIFramework
             itemObjects.Remove(itemObject);
             inactiveItemObjects.Remove(itemObject);
                 
-            UIGameObjectFactory.Destroy(itemObject);
+            UIGameObjectFactory.Return(itemObject);
         }
 
         [Serializable]

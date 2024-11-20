@@ -16,12 +16,12 @@ namespace Rehawk.UIFramework
             UIGameObjectFactory.destroyAction = destroyAction;
         }
 
-        internal static GameObject Create(GameObject prefab, Transform parent)
+        internal static GameObject Get(GameObject prefab, Transform parent)
         {
             return createAction.Invoke(prefab, parent);
         }
         
-        internal static void Destroy(GameObject gameObject)
+        internal static void Return(GameObject gameObject)
         {
             destroyAction.Invoke(gameObject);
         }
