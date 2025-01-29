@@ -10,6 +10,7 @@ namespace Rehawk.UIFramework
         private bool isEnabled;
         private Material material;
         private Color color;
+        private float alpha;
         
         public override bool IsVisible
         {
@@ -21,6 +22,8 @@ namespace Rehawk.UIFramework
                 {
                     targets[i].IsVisible = isVisible;
                 }
+                
+                OnPropertyChanged();
             }
         }
 
@@ -34,6 +37,8 @@ namespace Rehawk.UIFramework
                 {
                     targets[i].Enabled = isEnabled;
                 }
+                
+                OnPropertyChanged();
             }
         }
 
@@ -47,6 +52,8 @@ namespace Rehawk.UIFramework
                 {
                     targets[i].Material = material;
                 }
+                
+                OnPropertyChanged();
             }
         }
 
@@ -60,6 +67,23 @@ namespace Rehawk.UIFramework
                 {
                     targets[i].Color = color;
                 }
+                
+                OnPropertyChanged();
+            }
+        }
+
+        public override float Alpha
+        {
+            get { return alpha; }
+            set 
+            { 
+                alpha = value;
+                for (int i = 0; i < targets.Length; i++)
+                {
+                    targets[i].Alpha = alpha;
+                }
+                
+                OnPropertyChanged();
             }
         }
     }

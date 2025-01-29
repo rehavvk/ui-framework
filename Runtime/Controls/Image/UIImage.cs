@@ -69,6 +69,21 @@ namespace Rehawk.UIFramework
             }
         }
 
+        public override float Alpha
+        {
+            get { return Color.a; }
+            set
+            {
+                if (Color.a != value)
+                {
+                    var previousColor = Color;
+                    previousColor.a = value;
+                    Color = previousColor;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public override float FillAmount
         {
             get { return target.fillAmount; }

@@ -7,5 +7,6 @@ namespace Rehawk.UIFramework
         public abstract bool Enabled { get; set; }
         public abstract Material Material { get; set; }
         public abstract Color Color { get; set; }
+        public abstract float Alpha { get; set; }
     }
 }

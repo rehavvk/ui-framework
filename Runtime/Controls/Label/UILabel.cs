@@ -67,6 +67,19 @@ namespace Rehawk.UIFramework
             }
         }
 
+        public override float Alpha
+        {
+            get { return target.alpha; }
+            set
+            {
+                if (target.alpha != value)
+                {
+                    target.alpha = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         protected override void Awake()
         {
             base.Awake();

@@ -22,6 +22,8 @@ namespace Rehawk.UIFramework
                 {
                     targets[i].IsVisible = isVisible;
                 }
+                
+                OnPropertyChanged();
             }
         }
 
@@ -35,6 +37,8 @@ namespace Rehawk.UIFramework
                 {
                     targets[i].Enabled = isEnabled;
                 }
+                
+                OnPropertyChanged();
             }
         }
 
@@ -48,6 +52,8 @@ namespace Rehawk.UIFramework
                 {
                     targets[i].IsInteractable = isInteractable;
                 }
+                
+                OnPropertyChanged();
             }
         }
 
@@ -61,6 +67,8 @@ namespace Rehawk.UIFramework
                 {
                     targets[i].BoxedValue = boxedValue;
                 }
+                
+                OnPropertyChanged();
             }
         }
 
@@ -74,6 +82,8 @@ namespace Rehawk.UIFramework
                 {
                     targets[i].ChangedCommand = changedCommand;
                 }
+                
+                OnPropertyChanged();
             }
         }
     }

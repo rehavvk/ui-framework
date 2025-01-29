@@ -23,6 +23,8 @@ namespace Rehawk.UIFramework
                 {
                     targets[i].IsVisible = isVisible;
                 }
+                
+                OnPropertyChanged();
             }
         }
 
@@ -36,6 +38,8 @@ namespace Rehawk.UIFramework
                 {
                     targets[i].Enabled = isEnabled;
                 }
+                
+                OnPropertyChanged();
             }
         }
 
@@ -49,6 +53,8 @@ namespace Rehawk.UIFramework
                 {
                     targets[i].Material = material;
                 }
+                
+                OnPropertyChanged();
             }
         }
 
@@ -62,6 +68,20 @@ namespace Rehawk.UIFramework
                 {
                     targets[i].Color = color;
                 }
+                
+                OnPropertyChanged();
+            }
+        }
+
+        public override float Alpha
+        {
+            get { return Color.a; }
+            set
+            {
+                var previousColor = Color;
+                previousColor.a = value;
+                Color = previousColor;
+                OnPropertyChanged();
             }
         }
 
@@ -75,6 +95,8 @@ namespace Rehawk.UIFramework
                 {
                     targets[i].Sprite = sprite;
                 }
+                
+                OnPropertyChanged();
             }
         }
 
@@ -88,6 +110,8 @@ namespace Rehawk.UIFramework
                 {
                     targets[i].FillAmount = fillAmount;
                 }
+                
+                OnPropertyChanged();
             }
         }
     }
