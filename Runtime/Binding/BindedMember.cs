@@ -11,8 +11,9 @@ namespace Rehawk.UIFramework
     {
         private readonly Func<object> getOriginFunction;
         private readonly string memberPath;
-        private MemberInfo[] memberInfos;
-        private object[] memberValues;
+        private readonly string[] memberPathSplit;
+        private readonly MemberReference[] memberReferences;
+        private readonly object[] memberValues;
 
         private string memberName;
         
@@ -26,6 +27,11 @@ namespace Rehawk.UIFramework
         {
             this.getOriginFunction = getOriginFunction;
             this.memberPath = memberPath;
+            
+            memberPathSplit = memberPath.Split('.');
+
+            memberReferences = new MemberReference[memberPathSplit.Length];
+            memberValues = new object[memberPathSplit.Length - 1];
         }
 
         public void Evaluate()
@@ -49,45 +55,25 @@ namespace Rehawk.UIFramework
 
         private void EvaluateMemberPath()
         {
-            memberInfos = null;
-            memberValues = null;
-            
             if (origin != null && !string.IsNullOrEmpty(memberPath))
             {
-                string[] pathParts = memberPath.Split('.');
-
-                memberInfos = new MemberInfo[pathParts.Length];
-                memberValues = new object[pathParts.Length - 1];
-                
                 Type type = origin.GetType();
                 
-                for (int i = 0; i < pathParts.Length; i++)
+                for (int i = 0; i < memberPathSplit.Length; i++)
                 {
-                    memberName = pathParts[i];
+                    memberName = memberPathSplit[i];
+
+                    MemberReference memberReference = MemberReferenceCache.Get(type, memberName);
                     
-                    MemberInfo memberInfo = ReflectionUtility.GetMember(type, memberName)
-                                                             .FirstOrDefault();
-                    
-                    if (memberInfo == null)
+                    if (memberReference == null)
                     {
                         Debug.LogError($"Part of path to member couldn't be found. [memberName={memberName}, path={memberPath}]");
                         break;
                     }
 
-                    memberInfos[i] = memberInfo;
+                    memberReferences[i] = memberReference;
                     
-                    type = memberInfo.GetUnderlyingType();
-                    
-                    if (type == null)
-                    {
-                        Debug.LogError($"Type of member was null. [memberName={memberName}, path={memberPath}]");
-                        break;
-                    }
-                }
-
-                if (memberInfos.Length > 0 && memberInfos[memberInfos.Length - 1].MemberType == MemberTypes.Method)
-                {
-                    Debug.LogError($"Methods are not supported. [memberName={memberName}, path={memberPath}]");
+                    type = memberReference.Type;
                 }
             }
         }
@@ -96,15 +82,12 @@ namespace Rehawk.UIFramework
         {
             context = origin;
 
-            if (memberInfos != null)
+            for (int i = 0; i < memberReferences.Length - 1; i++)
             {
-                for (int i = 0; i < memberInfos.Length - 1; i++)
+                if (context != null)
                 {
-                    if (context != null)
-                    {
-                        context = GetMemberInfoValueSimple(context, memberInfos[i]);
-                        memberValues[i] = context;
-                    }
+                    context = memberReferences[i].ReadValue(context);
+                    memberValues[i] = context;
                 }
             }
         }
@@ -124,18 +107,10 @@ namespace Rehawk.UIFramework
         {
             object result = null;
 
-            if (context != null && memberInfos != null && memberInfos.Length > 0)
+            if (context != null && memberReferences != null && memberReferences.Length > 0)
             {
-                MemberInfo memberInfo = memberInfos[memberInfos.Length - 1];
-                    
-                if (memberInfo is PropertyInfo propertyInfo)
-                {
-                    result = propertyInfo.GetValue(context, null);
-                }
-                else if (memberInfo is FieldInfo fieldInfo)
-                {
-                    result = fieldInfo.GetValue(context);
-                }
+                MemberReference memberReference = memberReferences[^1];
+                result = memberReference.ReadValue(context);
             }
             
             return result;
@@ -143,35 +118,20 @@ namespace Rehawk.UIFramework
 
         public void Set(object value)
         {
-            if (context != null && memberInfos != null && memberInfos.Length > 0)
+            if (context != null && memberReferences != null && memberReferences.Length > 0)
             {
-                MemberInfo memberInfo = memberInfos[memberInfos.Length - 1];
-
-                if (memberInfo is PropertyInfo propertyInfo)
+                MemberReference memberReference = memberReferences[^1];
+                if (memberReference.CanWrite)
                 {
-                    propertyInfo.SetValue(context, value);
+                    memberReference.WriteValue(context, value);
                 }
-                else if (memberInfo is FieldInfo fieldInfo)
+                else
                 {
-                    fieldInfo.SetValue(context, value);
+                    Debug.LogError($"Member is not writeable. [memberName={memberName}, path={memberPath}]");
                 }
             }
         }
         
-        private object GetMemberInfoValueSimple(object instance, MemberInfo memberInfo)
-        {
-            if (memberInfo is PropertyInfo propertyInfo)
-            {
-                return propertyInfo.GetValue(instance, null);
-            }
-            else if (memberInfo is FieldInfo fieldInfo)
-            {
-                return fieldInfo.GetValue(instance);
-            }
-
-            return null;
-        }
-
         private void LinkToEvents()
         {
             if (origin is INotifyPropertyChanged originNotifyPropertyChanged)
@@ -252,7 +212,7 @@ namespace Rehawk.UIFramework
 
         private void OnOriginPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (memberInfos != null && memberInfos[0].Name == e.PropertyName)
+            if (memberReferences != null && memberReferences[0].Name == e.PropertyName)
             {
                 ReevaluateContext();
             }
@@ -264,7 +224,7 @@ namespace Rehawk.UIFramework
             {
                 int memberIndex = Array.IndexOf(memberValues, sender);
 
-                if (memberInfos[memberIndex + 1].Name == e.PropertyName)
+                if (memberReferences[memberIndex + 1].Name == e.PropertyName)
                 {
                     ReevaluateContext();
                 }

@@ -94,16 +94,9 @@ namespace Rehawk.UIFramework
                 return;
             }
             
-            int index = itemObjects.IndexOf(itemObject);
-
-            if (index < 0)
-            {
-                return;
-            }
-
             itemObjects.Remove(itemObject);
             inactiveItemObjects.Remove(itemObject);
-                
+
             UIGameObjectFactory.Return(itemObject);
         }
 

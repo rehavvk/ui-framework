@@ -27,18 +27,15 @@ namespace Rehawk.UIFramework
             {
                 items = value;
                 
-                int newCount = 0;
-
                 if (items != null)
                 {
                     foreach (object data in items)
                     {
                         newDatasets.Add(data);
-                        newCount += 1;
                     }
                 }
-
-                count = newCount;
+                
+                count = newDatasets.Count;
                 
                 RefreshItems();
             }
@@ -216,27 +213,37 @@ namespace Rehawk.UIFramework
             datasets.Clear();
             datasets.AddRange(newDatasets);
             newDatasets.Clear();
-            
+
             OnPropertyChanged();
             OnPropertyChanged(nameof(Count));
         }
 
         private void InformListItemReceiver(GameObject item, int index, object data)
         {
+            IUIListItemReceiver itemReceiver;
+            
             if (itemReceiverType != null)
             {
-                if (item.TryGetComponent(itemReceiverType, out Component itemReceiverComponent) && itemReceiverComponent is IUIListItemReceiver itemReceiver)
-                {
-                    itemReceiver.SetListItem(new ListItem(index, data));
-                    return;
-                }
-                
-                Debug.LogError($"No item receiver has been found. [requestedItemReceiver={itemReceiverType}]", item);
+                Component itemReceiverComponent = item.GetComponent(itemReceiverType);
+                itemReceiver = itemReceiverComponent as IUIListItemReceiver;
             }
-            else if (item.TryGetComponent(out IUIListItemReceiver itemReceiver))
+            else
+            {
+                itemReceiver = item.GetComponent<IUIListItemReceiver>();
+            }
+            
+            if (itemReceiver != null)
             {
                 itemReceiver.SetListItem(new ListItem(index, data));
-                Debug.LogWarning($"No item receiver has been setup. First other item receiver was used. [usedItemReceiver={itemReceiver.GetType()}]", item);
+
+                if (itemReceiverType == null)
+                {
+                    Debug.LogWarning($"No item receiver has been setup. First component implementing IUIListItemReceiver was used. [itemReceiver={itemReceiver.GetType()}]", item);
+                }
+            }
+            else if (itemReceiverType != null)
+            {
+                Debug.LogError($"No item receiver has been found. [requestedItemReceiver={itemReceiverType}]", item);
             }
         }
     }

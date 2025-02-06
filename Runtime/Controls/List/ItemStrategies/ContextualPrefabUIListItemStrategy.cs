@@ -105,15 +105,14 @@ namespace Rehawk.UIFramework
             
             int index = itemObjects.IndexOf(itemObject);
 
-            if (index < 0)
+            if (index >= 0)
             {
-                return;
+                itemObjectPrefabs.RemoveAt(index);
             }
 
             itemObjects.Remove(itemObject);
             inactiveItemObjects.Remove(itemObject);
-            itemObjectPrefabs.RemoveAt(index);
-                
+            
             UIGameObjectFactory.Return(itemObject);
         }
 

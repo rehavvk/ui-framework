@@ -43,6 +43,19 @@ namespace Rehawk.UIFramework
             }
         }
 
+        public override Sprite OverrideSprite
+        {
+            get { return target.overrideSprite; }
+            set
+            {
+                if (target.overrideSprite != value)
+                {
+                    target.overrideSprite = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public override Material Material
         {
             get { return target.material; }

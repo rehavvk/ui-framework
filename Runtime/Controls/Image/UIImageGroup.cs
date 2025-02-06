@@ -11,6 +11,7 @@ namespace Rehawk.UIFramework
         private Material material;
         private Color color;
         private Sprite sprite;
+        private Sprite overrideSprite;
         private float fillAmount;
         
         public override bool IsVisible
@@ -94,6 +95,21 @@ namespace Rehawk.UIFramework
                 for (int i = 0; i < targets.Length; i++)
                 {
                     targets[i].Sprite = sprite;
+                }
+                
+                OnPropertyChanged();
+            }
+        }
+
+        public override Sprite OverrideSprite
+        {
+            get { return overrideSprite; }
+            set
+            {
+                overrideSprite = value;
+                for (int i = 0; i < targets.Length; i++)
+                {
+                    targets[i].OverrideSprite = overrideSprite;
                 }
                 
                 OnPropertyChanged();
