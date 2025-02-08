@@ -6,7 +6,7 @@ namespace Rehawk.UIFramework
     {
         public static Binding OnChanged(this Binding binding, Action callback)
         {
-            binding.Evaluated += _ =>
+            binding.Changed += _ =>
             {
                 callback.Invoke();
             };
@@ -14,9 +14,13 @@ namespace Rehawk.UIFramework
             return binding;
         }
         
-        public static Binding OnChanged(this Binding binding, Action<EvaluationDirection> callback)
+        public static Binding OnChanged(this Binding binding, ChangeOrigin origin, Action callback)
         {
-            binding.Evaluated += callback;
+            binding.Changed += changeOrigin =>
+            {
+                if (origin == changeOrigin)
+                    callback.Invoke();
+            };
             
             return binding;
         }

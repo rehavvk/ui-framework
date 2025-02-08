@@ -17,7 +17,7 @@ namespace Rehawk.UIFramework
         private readonly List<IBindingConnection> connections = new List<IBindingConnection>();
         private readonly List<string> tags = new List<string>();
 
-        public event Action<EvaluationDirection> Evaluated;
+        public event Action<ChangeOrigin> Changed;
             
         private Binding(object parent)
         {
@@ -111,11 +111,6 @@ namespace Rehawk.UIFramework
 
         internal void Evaluate()
         {
-            Evaluate(EvaluationDirection.Source);
-        }
-
-        private void Evaluate(EvaluationDirection direction)
-        {
             sourceStrategy.Evaluate();
             destinationStrategy.Evaluate();
 
@@ -123,20 +118,20 @@ namespace Rehawk.UIFramework
             {
                 connections[i].Evaluate();
             }
-            
-            Evaluated?.Invoke(direction);
         }
         
         internal void SourceToDestination()
         {
             object value = sourceStrategy.Get();
             
-            if (converter != default)
+            if (converter != null)
             {
                 value = converter.Convert(value);
             }
             
             destinationStrategy.Set(value);
+            
+            Changed?.Invoke(ChangeOrigin.Source);
         }
 
         private void DestinationToSource()
@@ -149,6 +144,8 @@ namespace Rehawk.UIFramework
             }
             
             sourceStrategy.Set(value);
+            
+            Changed?.Invoke(ChangeOrigin.Destination);
         }
 
         internal void ConnectTo<T>(Expression<Func<T>> memberExpression, BindingConnectionDirection direction = BindingConnectionDirection.SourceToDestination)
@@ -196,11 +193,11 @@ namespace Rehawk.UIFramework
             switch (direction)
             {
                 case BindingConnectionDirection.SourceToDestination:
-                    Evaluate(EvaluationDirection.Source);
+                    Evaluate();
                     SourceToDestination();
                     break;
                 case BindingConnectionDirection.DestinationToSource:
-                    Evaluate(EvaluationDirection.Destination);
+                    Evaluate();
                     DestinationToSource();
                     break;
                 default:

@@ -1,6 +1,6 @@
 ﻿namespace Rehawk.UIFramework
 {
-    public enum EvaluationDirection
+    public enum ChangeOrigin
     {
         Source,
         Destination
