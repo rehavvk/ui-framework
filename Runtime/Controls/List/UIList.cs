@@ -20,6 +20,8 @@ namespace Rehawk.UIFramework
         private UIListItemCallbackDelegate onActivated;
         private UIListItemCallbackDelegate onDeactivated;
 
+        private readonly Dictionary<object, GameObject> oldDataToItem = new Dictionary<object, GameObject>();
+
         public override IEnumerable Items
         {
             get { return items; }
@@ -123,96 +125,90 @@ namespace Rehawk.UIFramework
             }
         }
 
+        private readonly List<GameObject> deactivatedItemObjects = new List<GameObject>();
+        
         private void RefreshItems()
         {
-            for (int i = 0; i < datasets.Count; i++)
+            if (datasets.Count > 0)
             {
-                object oldData = null;
-                if (i < datasets.Count)
+                for (int i = 0; i < datasets.Count; i++)
                 {
-                    oldData = datasets[i];
-                }
+                    object oldData = datasets[i];
 
-                GameObject item = itemStrategy.GetItemObject(i);
-                
-                if (i < count)
-                {
-                    object data = null;
-                    if (i < newDatasets.Count)
+                    GameObject item = itemStrategy.GetItemObject(i);
+
+                    if (newDatasets.Contains(oldData))
                     {
-                        data = newDatasets[i];
+                        oldDataToItem[oldData] = item;
                     }
-
-                    if (oldData != data)
-                    {
-                        InvokeCallback(UIListItemCallback.Deactivated, i, item, oldData);
-                        
-                        ItemReport report = itemStrategy.SetItemObject(i, data);
-                        GameObject setItem = report.Object;
-                        
-                        InformListItemReceiver(setItem, i, data);
-                        
-                        if (report.IsNew)
-                        {
-                            InvokeCallback(UIListItemCallback.Initialized, i, setItem, data);
-                        }
                     
-                        InvokeCallback(UIListItemCallback.Activated, i, setItem, data);
-                    }
+                    InvokeCallback(UIListItemCallback.Deactivated, i, item, oldData);
+                    itemStrategy.DeactivateItemObject(item);
+                    
+                    deactivatedItemObjects.Add(item);
+                }
+            }
+            else
+            {
+                int itemCount = itemStrategy.ItemObjects.Count;
+                for (int i = 0; i < itemCount; i++)
+                {
+                    GameObject item = itemStrategy.GetItemObject(i);
+                    
+                    InvokeCallback(UIListItemCallback.Deactivated, i, item, null);
+                    itemStrategy.DeactivateItemObject(item);
+                    
+                    deactivatedItemObjects.Add(item);
+                }
+            }
+
+            for (int i = 0; i < Count; i++)
+            {
+                object newData = null;
+                if (i < newDatasets.Count)
+                {
+                    newData = newDatasets[i];
+                }
+                
+                if (newData != null && oldDataToItem.TryGetValue(newData, out GameObject item) && item != null)
+                {
+                    itemStrategy.SetItemObject(i, item, newData);
+                }
+                else if (i < itemStrategy.ItemObjects.Count)
+                {
+                    item = itemStrategy.GetItemObject(i);
+                    itemStrategy.SetItemObject(i, newData);
                 }
                 else
                 {
-                    InformListItemReceiver(item, i, null);
-                    
-                    InvokeCallback(UIListItemCallback.Deactivated, i, item, oldData);
-                    itemStrategy.DeactivateItemObject(item);
-                }
-            }
-            
-            if (itemStrategy.ItemObjects.Count < count)
-            {
-                for (int i = itemStrategy.ItemObjects.Count; i < count; i++)
-                {
-                    object data = null;
-                    if (i < newDatasets.Count)
-                    {
-                        data = newDatasets[i];
-                    }
-                    
-                    ItemReport report = itemStrategy.AddItemObject(i, data);
-                    InformListItemReceiver(report.Object, i, data);
+                    ItemReport report = itemStrategy.AddItemObject(i, newData);
+                    item = report.Object;
 
                     if (report.IsNew)
                     {
-                        InvokeCallback(UIListItemCallback.Initialized, i, report.Object, data);
+                        InvokeCallback(UIListItemCallback.Initialized, i, item, newData);
                     }
-                    
-                    InvokeCallback(UIListItemCallback.Activated, i, report.Object, data);
                 }
-            }
-            else if (itemStrategy.ItemObjects.Count > Count)
-            {
-                for (int i = itemStrategy.ItemObjects.Count - 1; i >= Count; i--)
-                {
-                    object oldData = null;
-                    if (i >= 0 && i < datasets.Count)
-                    {
-                        oldData = datasets[i];
-                    }
-                    
-                    GameObject item = itemStrategy.GetItemObject(i);
-                    InformListItemReceiver(item, i, null);
-                    
-                    InvokeCallback(UIListItemCallback.Deactivated, i, item, oldData);
-                    itemStrategy.DeactivateItemObject(item);
-                }
+
+                deactivatedItemObjects.Remove(item);
+                
+                InvokeCallback(UIListItemCallback.Activated, i, item, newData);
+                
+                InformListItemReceiver(item, i, newData);
             }
 
+            for (int i = 0; i < deactivatedItemObjects.Count; i++)
+            {
+                InformListItemReceiver(deactivatedItemObjects[i], -1, null);
+            }
+            
             itemStrategy.RemoveInactiveItemObjects();
 
             datasets.Clear();
             datasets.AddRange(newDatasets);
             newDatasets.Clear();
+            oldDataToItem.Clear();
+            deactivatedItemObjects.Clear();
 
             OnPropertyChanged();
             OnPropertyChanged(nameof(Count));

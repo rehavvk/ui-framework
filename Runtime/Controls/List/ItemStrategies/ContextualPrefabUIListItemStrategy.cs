@@ -53,11 +53,18 @@ namespace Rehawk.UIFramework
                 RemoveItemObject(oldItemObject);
                 return AddItemObject(index, data);
             }
-            
-            oldItemObject.transform.SetSiblingIndex(index);
-            oldItemObject.SetActive(true);
 
-            return new ItemReport(oldItemObject, false);
+            return SetItemObject(index, oldItemObject, data);
+        }
+
+        public ItemReport SetItemObject(int index, GameObject itemObject, object data)
+        {
+            inactiveItemObjects.Remove(itemObject);
+            
+            itemObject.transform.SetSiblingIndex(index);
+            itemObject.SetActive(true);
+
+            return new ItemReport(itemObject, false);
         }
 
         public ItemReport AddItemObject(int index, object data)

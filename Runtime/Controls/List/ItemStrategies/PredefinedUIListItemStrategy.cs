@@ -73,18 +73,7 @@ namespace Rehawk.UIFramework
             if (index >= 0 && index < itemObjects.Count)
             {
                 GameObject itemObject = GetItemObject(index);
-                inactiveItemObjects.Remove(itemObject);
-
-                if (!activeItemObjects.Contains(itemObject))
-                {
-                    activeItemObjects.Add(itemObject);
-                }
-            
-                bool isNew = freshItemObjects.Remove(itemObject);
-
-                itemObject.SetActive(true);
-                
-                addReport = new ItemReport(itemObject, isNew);
+                addReport = SetItemObject(index, itemObject, data);
             }
             else
             {
@@ -93,6 +82,22 @@ namespace Rehawk.UIFramework
             }
             
             return addReport;
+        }
+
+        public ItemReport SetItemObject(int index, GameObject itemObject, object data)
+        {
+            inactiveItemObjects.Remove(itemObject);
+
+            if (!activeItemObjects.Contains(itemObject))
+            {
+                activeItemObjects.Add(itemObject);
+            }
+            
+            bool isNew = freshItemObjects.Remove(itemObject);
+
+            itemObject.SetActive(true);
+                
+            return new ItemReport(itemObject, isNew);
         }
 
         public ItemReport AddItemObject(int index, object data)
