@@ -169,28 +169,30 @@ namespace Rehawk.UIFramework
                 {
                     newData = newDatasets[i];
                 }
+
+                ItemReport report;
                 
                 if (newData != null && oldDataToItem.TryGetValue(newData, out GameObject item) && item != null)
                 {
-                    itemStrategy.SetItemObject(i, item, newData);
+                    report = itemStrategy.SetItemObject(i, item, newData);
                 }
                 else if (i < itemStrategy.ItemObjects.Count)
                 {
-                    item = itemStrategy.GetItemObject(i);
-                    itemStrategy.SetItemObject(i, newData);
+                    report = itemStrategy.SetItemObject(i, newData);
                 }
                 else
                 {
-                    ItemReport report = itemStrategy.AddItemObject(i, newData);
-                    item = report.Object;
-
-                    if (report.IsNew)
-                    {
-                        InvokeCallback(UIListItemCallback.Initialized, i, item, newData);
-                    }
+                    report = itemStrategy.AddItemObject(i, newData);
                 }
 
+                item = report.Object;
+
                 deactivatedItemObjects.Remove(item);
+                
+                if (report.IsNew)
+                {
+                    InvokeCallback(UIListItemCallback.Initialized, i, item, newData);
+                }
                 
                 InvokeCallback(UIListItemCallback.Activated, i, item, newData);
                 
