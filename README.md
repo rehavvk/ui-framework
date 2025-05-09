@@ -14,7 +14,18 @@ Flexible UI framework designed specifically for the Unity Engine. The framework 
 This UI framework is released under the MIT License. Feel free to use, modify, and distribute it in your projects.
 
 ## Getting Started
-To incorporate this UI framework into your Unity project, simply clone this repository.
+To incorporate this UI framework into your Unity project:
+
+Open your Unity project's `Packages/manifest.json` file and add the following entries to the `dependencies` section:
+
+```json
+{
+  "dependencies": {
+    "com.rehawk.ui-framework": "https://github.com/rehavvk/ui-framework.git",
+    "com.mackysoft.serializereferenceextensions": "https://github.com/mackysoft/Unity-SerializeReferenceExtensions.git?path=Assets/MackySoft/MackySoft.SerializeReferenceExtensions"
+  }
+}
+```
 
 More documentation, including detailed usage guides, will be added soon.
 
