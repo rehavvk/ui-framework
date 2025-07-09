@@ -28,11 +28,6 @@ namespace Rehawk.UIFramework
             
             if (value != null)
             {
-                if (value.IsNumber() && value is IFormattable formattableValue)
-                {
-                    return formattableValue.ToString(format, CultureInfo);
-                }
-
                 return string.Format(format, value);
             }
 
