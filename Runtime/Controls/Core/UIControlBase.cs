@@ -28,12 +28,6 @@ namespace Rehawk.UIFramework
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        [Obsolete("Will be removed in future releases. Use your own serialized field to define the panel instead.")]
-        public UIPanel ParentPanel
-        {
-            get { return parentPanel; }
-        }
-
         protected override void Awake()
         {
             base.Awake();

@@ -136,12 +136,15 @@ namespace Rehawk.UIFramework
                     object oldData = datasets[i];
 
                     GameObject item = itemStrategy.GetItemObject(i);
-
+                    
                     if (newDatasets.Contains(oldData))
                     {
                         oldDataToItem[oldData] = item;
                     }
                     
+                    if (!item)
+                        continue;
+
                     InvokeCallback(UIListItemCallback.Deactivated, i, item, oldData);
                     itemStrategy.DeactivateItemObject(item);
                     
@@ -155,6 +158,9 @@ namespace Rehawk.UIFramework
                 {
                     GameObject item = itemStrategy.GetItemObject(i);
                     
+                    if (!item)
+                        continue;
+
                     InvokeCallback(UIListItemCallback.Deactivated, i, item, null);
                     itemStrategy.DeactivateItemObject(item);
                     
