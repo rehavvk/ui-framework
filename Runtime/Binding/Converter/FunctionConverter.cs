@@ -4,7 +4,7 @@ namespace Rehawk.UIFramework
 {
     public delegate object ValueConvertFunctionDelegate(object value);
     public delegate object ValueConvertFunctionDelegate<in T>(T value);
-    
+
     public class FunctionConverter : IValueConverter
     {
         private readonly ValueConvertFunctionDelegate convertFunction;
