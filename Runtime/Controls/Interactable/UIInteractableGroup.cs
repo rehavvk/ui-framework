@@ -4,6 +4,8 @@ namespace Rehawk.UIFramework
 {
     public class UIInteractableGroup : UIInteractableBase
     {
+        [TextArea(1, 10)]
+        [SerializeField] private string documentation;
         [SerializeField] private UIInteractableBase[] targets;
 
         private bool isVisible;

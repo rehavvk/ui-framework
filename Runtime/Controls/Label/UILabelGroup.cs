@@ -4,6 +4,8 @@ namespace Rehawk.UIFramework
 {
     public class UILabelGroup : UILabelBase
     {
+        [TextArea(1, 10)]
+        [SerializeField] private string documentation;
         [SerializeField] private UILabelBase[] targets;
 
         private bool isVisible;

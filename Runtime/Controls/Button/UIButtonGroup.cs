@@ -4,6 +4,8 @@ namespace Rehawk.UIFramework
 {
     public class UIButtonGroup : UIButtonBase
     {
+        [TextArea(1, 10)]
+        [SerializeField] private string documentation;
         [SerializeField] private UIButtonBase[] targets;
         
         private bool isVisible;

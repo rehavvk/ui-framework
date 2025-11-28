@@ -4,6 +4,8 @@ namespace Rehawk.UIFramework
 {
     public class UIElementGroup : UIElementBase
     {
+        [TextArea(1, 10)]
+        [SerializeField] private string documentation;
         [SerializeField] private UIElementBase[] targets;
 
         private bool isVisible;

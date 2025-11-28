@@ -4,6 +4,8 @@ namespace Rehawk.UIFramework
 {
     public class UIGraphicGroup : UIGraphicBase
     {
+        [TextArea(1, 10)]
+        [SerializeField] private string documentation;
         [SerializeField] private UIGraphicBase[] targets;
 
         private bool isVisible;

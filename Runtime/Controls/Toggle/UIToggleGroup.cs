@@ -4,6 +4,8 @@ namespace Rehawk.UIFramework
 {
     public class UIToggleGroup : UIToggleBase
     {
+        [TextArea(1, 10)]
+        [SerializeField] private string documentation;
         [SerializeField] private UIToggleBase[] targets;
         
         private bool isVisible;

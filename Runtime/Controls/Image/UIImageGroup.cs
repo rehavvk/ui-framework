@@ -4,6 +4,8 @@ namespace Rehawk.UIFramework
 {
     public class UIImageGroup : UIImageBase
     {
+        [TextArea(1, 10)]
+        [SerializeField] private string documentation;
         [SerializeField] private UIImageBase[] targets;
 
         private bool isVisible;

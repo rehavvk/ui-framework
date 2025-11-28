@@ -4,6 +4,8 @@ namespace Rehawk.UIFramework
 {
     public class UISliderGroup : UISliderBase
     {
+        [TextArea(1, 10)]
+        [SerializeField] private string documentation;
         [SerializeField] private UISliderBase[] targets;
         
         private bool isVisible;
