@@ -40,7 +40,7 @@ namespace Rehawk.UIFramework
             return binding.ConvertBy(new BoolConverter(invert));
         }
 
-        public static Binding Inverted(this Binding binding)
+        public static Binding ConvertToInvertedBool(this Binding binding)
         {
             return binding.ConvertToBool(true);
         }

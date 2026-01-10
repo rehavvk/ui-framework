@@ -109,7 +109,7 @@ namespace Rehawk.UIFramework
 
             if (context != null && memberReferences != null && memberReferences.Length > 0)
             {
-                MemberReference memberReference = memberReferences[^1];
+                MemberReference memberReference = memberReferences[memberReferences.Length - 1];
                 result = memberReference.ReadValue(context);
             }
             
@@ -120,7 +120,7 @@ namespace Rehawk.UIFramework
         {
             if (context != null && memberReferences != null && memberReferences.Length > 0)
             {
-                MemberReference memberReference = memberReferences[^1];
+                MemberReference memberReference = memberReferences[memberReferences.Length - 1];
                 if (memberReference.CanWrite)
                 {
                     memberReference.WriteValue(context, value);

@@ -8,15 +8,12 @@ namespace Rehawk.UIFramework
     {
         [SerializeField] private RectTransform root;
 
-        public override bool IsVisible
-        {
-            get { return root.gameObject.activeSelf; }
-        }
+        public override bool IsVisible => root.gameObject.activeSelf;
 
-        public override void SetVisible(bool visible, Action callback)
+        public override void SetVisible(UIPanelBase panel, bool visible, Action doneCallback)
         {
             root.gameObject.SetActive(visible);
-            callback?.Invoke();
+            doneCallback?.Invoke();
         }
     }
 }

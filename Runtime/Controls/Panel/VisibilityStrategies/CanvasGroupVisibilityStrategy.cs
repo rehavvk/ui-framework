@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Rehawk.UIFramework
 {
@@ -14,18 +13,15 @@ namespace Rehawk.UIFramework
         
         private bool isVisible;
         
-        public override bool IsVisible
-        {
-            get { return isVisible; }
-        }
+        public override bool IsVisible => isVisible;
 
-        public override void SetVisible(bool visible, Action callback)
+        public override void SetVisible(UIPanelBase panel, bool visible, Action doneCallback)
         {
             isVisible = visible;
             group.alpha = isVisible ? visibleSettings.Alpha : invisibleSettings.Alpha;
             group.interactable = isVisible ? visibleSettings.IsInteractable : invisibleSettings.IsInteractable;
             group.blocksRaycasts = isVisible ? visibleSettings.IsBlockingRaycasts : invisibleSettings.IsBlockingRaycasts;
-            callback?.Invoke();
+            doneCallback?.Invoke();
         }
 
         [Serializable]

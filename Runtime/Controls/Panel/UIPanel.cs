@@ -39,7 +39,7 @@ namespace Rehawk.UIFramework
                 
                 if (visibilityStrategy != null)
                 {
-                    visibilityStrategy.SetVisible(value, HandleVisibilityChange);
+                    visibilityStrategy.SetVisible(this, value, HandleVisibilityChange);
                 }
                 else
                 {

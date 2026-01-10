@@ -8,15 +8,12 @@ namespace Rehawk.UIFramework
     {
         [SerializeField] private Canvas canvas;
 
-        public override bool IsVisible
-        {
-            get { return canvas.enabled; }
-        }
+        public override bool IsVisible => canvas.enabled;
 
-        public override void SetVisible(bool visible, Action callback)
+        public override void SetVisible(UIPanelBase panel, bool visible, Action doneCallback)
         {
             canvas.enabled = visible;
-            callback?.Invoke();
+            doneCallback?.Invoke();
         }
     }
 }
