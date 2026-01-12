@@ -11,8 +11,9 @@ namespace Rehawk.UIFramework
         [SerializeField] private ParentConstraint parentConstraint = ParentConstraint.None;
         
         [Space]
-        
+#if !ODIN_INSPECTOR   
         [SubclassSelector]
+#endif
         [SerializeReference] private VisibilityStrategyBase visibilityStrategy;
         
         private bool wasPreviousVisible;
