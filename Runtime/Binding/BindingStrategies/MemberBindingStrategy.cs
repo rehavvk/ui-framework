@@ -36,14 +36,14 @@ namespace Rehawk.UIFramework
 
         public object Get()
         {
-            object value = member.Get();
+            object result = null;
             
-            if (converter != null)
+            if (member.TryGet(out result) && converter != null)
             {
-                value = converter.Convert(value);
+                result = converter.Convert(result);
             }
 
-            return value;
+            return result;
         }
 
         public void Set(object value)

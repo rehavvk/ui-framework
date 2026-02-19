@@ -30,7 +30,8 @@ namespace Rehawk.UIFramework
 
         public object Get()
         {
-            return member.Get();
+            member.TryGet(out object result);
+            return result;
         }
 
         private void OnMemberGotDirty()

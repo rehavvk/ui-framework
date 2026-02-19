@@ -48,8 +48,9 @@ namespace Rehawk.UIFramework
             EvaluateMemberPath();
             EvaluateContext();
             
-            value = Get();
-
+            TryGet(out object result);
+            value = result; 
+            
             LinkToEvents();
         }
         
@@ -108,17 +109,18 @@ namespace Rehawk.UIFramework
             GotDirty?.Invoke();
         }
 
-        public object Get()
+        public bool TryGet(out object result)
         {
-            object result = null;
+            result = null;
 
             if (context != null && memberReferences != null && memberReferences.Length > 0)
             {
                 MemberReference memberReference = memberReferences[memberReferences.Length - 1];
                 result = memberReference.ReadValue(context);
+                return true;
             }
             
-            return result;
+            return false;
         }
 
         public void Set(object value)
