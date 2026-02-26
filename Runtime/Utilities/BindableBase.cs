@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -11,6 +12,7 @@ namespace Rehawk.UIFramework
     /// This class is designed to support data binding scenarios typically used in MVVM (Model-View-ViewModel) patterns.
     /// It provides helper methods to notify when properties change, thus enabling UI elements to react to changes in the underlying data model.
     /// </remarks>
+    [Serializable]
     public abstract class BindableBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;

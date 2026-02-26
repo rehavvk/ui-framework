@@ -3,11 +3,8 @@ using UnityEngine;
 
 namespace Rehawk.UIFramework
 {
-    /// <summary>
-    /// Serves as a base class for UI controls that manage and manipulate a context object,
-    /// providing common functionality for managing the context lifecycle and interacting with other components.
-    /// </summary>
-    public abstract class UIContextControlBase : UIControlBase, IUIContextControl
+    [Serializable]
+    public abstract class UIVirtualContextControlBase : UIVirtualControlBase, IUIContextControl
     {
         public event Action ContextChanged;
 
@@ -70,31 +67,8 @@ namespace Rehawk.UIFramework
         protected virtual void AfterContextChanged() {}
     }
     
-    public interface IUIContextControl<out T> : IUIContextControl
-    {
-        /// <summary>
-        /// Gets the context object associated with the control, strongly-typed to the specified context type.
-        /// </summary>
-        /// <remarks>
-        /// This property provides access to the context object of the control. The context type is determined by the generic type parameter
-        /// defined in the implementation. Accessing this property allows retrieval of the associated context in its strongly-typed form,
-        /// enabling type-safe operations specific to the context type.
-        /// The context must be set and compatible with the specified type; otherwise, accessing this property may result in an exception
-        /// or an unexpected default behavior, depending on the implementation.
-        /// </remarks>
-        T Context { get; }
-
-        /// <summary>
-        /// Gets the base type of the context managed by the control.
-        /// </summary>
-        /// <remarks>
-        /// This property provides the base <see cref="Type"/> of the context associated with the control, as defined during the control implementation.
-        /// It is useful for determining the expected type of the context without directly retrieving it.
-        /// </remarks>
-        Type ContextBaseType { get; }
-    }
-
-    public abstract class UIContextControlBase<T> : UIContextControlBase, IUIContextControl<T>
+    [Serializable]
+    public abstract class UIVirtualContextControlBase<T> : UIVirtualContextControlBase, IUIContextControl<T>
     {
         public T Context { get; private set; }
 

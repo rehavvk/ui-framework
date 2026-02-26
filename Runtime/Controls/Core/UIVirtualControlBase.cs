@@ -5,72 +5,24 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace Rehawk.UIFramework
 {
-    /// <summary>
-    /// Provides a base implementation for UI controls.
-    /// This class is designed to manage UI component behavior, bindings, and notify upon property changes.
-    /// </summary>
-    public abstract class UIControlBase : UIBehaviour, IUIControl
+    [Serializable]
+    public abstract class UIVirtualControlBase : IUIControl
     {
-        private UIPanel parentPanel;
-        
         private readonly List<Binding> bindings = new();
         
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected override void Awake()
+        public void Init()
         {
-            base.Awake();
-            
-            parentPanel = GetComponentInParent<UIPanel>();
-
-            if (parentPanel)
-            {
-                parentPanel.BecameVisible += OnPanelBecameVisible;
-                parentPanel.BecameInvisible += OnPanelBecameInvisible;
-            }
-        }
-
-        protected override void Start()
-        {
-            base.Start();
-            
             SetupBindingsInternal();
         }
 
-        protected override void OnDestroy()
+        public void Release()
         {
-            base.OnDestroy();
-            
-            if (parentPanel)
-            {
-                parentPanel.BecameVisible -= OnPanelBecameVisible;
-                parentPanel.BecameInvisible -= OnPanelBecameInvisible;
-            }
-
-            ReleaseBindings();
-        }
-        
-        protected override void OnTransformParentChanged()
-        {
-            base.OnTransformParentChanged();
-
-            if (parentPanel)
-            {
-                parentPanel.BecameVisible -= OnPanelBecameVisible;
-                parentPanel.BecameInvisible -= OnPanelBecameInvisible;
-            }
-            
-            parentPanel = GetComponentInParent<UIPanel>();
-            
-            if (parentPanel)
-            {
-                parentPanel.BecameVisible += OnPanelBecameVisible;
-                parentPanel.BecameInvisible += OnPanelBecameInvisible;
-            }
+            ReleaseBindings();       
         }
         
         private void SetupBindingsInternal()
@@ -152,18 +104,6 @@ namespace Rehawk.UIFramework
             }
         }
 
-        /// <summary>
-        /// Called when the UI element or control parent panel becomes visible.
-        /// This method can be overridden in derived classes to define custom behavior upon the control becoming visible.
-        /// </summary>
-        protected virtual void OnBecameVisible() {}
-
-        /// <summary>
-        /// Called when the UI element or control parent panel becomes invisible.
-        /// This method can be overridden in derived classes to define custom behavior upon the control becoming invisible.
-        /// </summary>
-        protected virtual void OnBecameInvisible() {}
-        
         private void ReleaseBindings()
         {
             for (int i = 0; i < bindings.Count; i++)
@@ -172,16 +112,6 @@ namespace Rehawk.UIFramework
             }
         }
         
-        private void OnPanelBecameVisible(UIPanel panel)
-        {
-            OnBecameVisible();
-        }
-
-        private void OnPanelBecameInvisible(UIPanel panel)
-        {
-            OnBecameInvisible();
-        }
-
         /// <summary>
         /// Notifies listeners that a property value has changed.
         /// This method invokes the <see cref="PropertyChanged"/> event with the provided property name.

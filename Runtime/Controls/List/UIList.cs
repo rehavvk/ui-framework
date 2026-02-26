@@ -12,8 +12,8 @@ namespace Rehawk.UIFramework
     /// </summary>
     public class UIList : UIListBase
     {
-        private readonly List<object> datasets = new List<object>();
-        private readonly List<object> newDatasets = new List<object>();
+        private readonly List<object> datasets = new();
+        private readonly List<object> newDatasets = new();
         
         private IUIListItemStrategy itemStrategy;
         private Type itemReceiverType;
@@ -25,7 +25,7 @@ namespace Rehawk.UIFramework
         private UIListItemCallbackDelegate onActivated;
         private UIListItemCallbackDelegate onDeactivated;
 
-        private readonly Dictionary<object, GameObject> oldDataToItem = new Dictionary<object, GameObject>();
+        private readonly Dictionary<object, GameObject> oldDataToItem = new();
 
         public override IEnumerable Items
         {
