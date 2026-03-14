@@ -39,7 +39,9 @@ namespace Rehawk.UIFramework
         /// </summary>
         /// <param name="visible">A boolean value indicating whether the panel should be visible
         /// (true) or hidden (false).</param>
-        public abstract void SetVisible(bool visible);
+        /// <param name="instant">A boolean value indicating whether the panel should change it's state instant
+        /// or with whatever duration the visibility strategy works.</param>
+        public abstract void SetVisible(bool visible, bool instant = false);
 
         /// <summary>
         /// Toggles the visibility state of the panel. If the panel is currently visible,

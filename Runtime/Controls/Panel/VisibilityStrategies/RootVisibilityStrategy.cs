@@ -15,7 +15,7 @@ namespace Rehawk.UIFramework
 
         public override bool IsVisible => root.gameObject.activeSelf;
 
-        public override void SetVisible(UIPanelBase panel, bool visible, Action doneCallback)
+        public override void SetVisible(UIPanelBase panel, bool visible, bool instant, Action doneCallback)
         {
             root.gameObject.SetActive(visible);
             doneCallback?.Invoke();

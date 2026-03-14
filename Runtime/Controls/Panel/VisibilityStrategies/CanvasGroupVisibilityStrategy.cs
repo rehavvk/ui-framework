@@ -19,7 +19,7 @@ namespace Rehawk.UIFramework
         
         public override bool IsVisible => isVisible;
 
-        public override void SetVisible(UIPanelBase panel, bool visible, Action doneCallback)
+        public override void SetVisible(UIPanelBase panel, bool visible, bool instant, Action doneCallback)
         {
             isVisible = visible;
             group.alpha = isVisible ? visibleSettings.Alpha : invisibleSettings.Alpha;

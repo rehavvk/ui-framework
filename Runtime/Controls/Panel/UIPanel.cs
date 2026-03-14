@@ -51,17 +51,7 @@ namespace Rehawk.UIFramework
             }
             set
             {
-                wasPreviousVisible = IsVisible;
-                
-                if (visibilityStrategy != null)
-                {
-                    visibilityStrategy.SetVisible(this, value, HandleVisibilityChange);
-                }
-                else
-                {
-                    gameObject.SetActive(value);
-                    HandleVisibilityChange();
-                }
+                SetVisible(value);
             }
         }
 
@@ -82,7 +72,7 @@ namespace Rehawk.UIFramework
 
             if (visibility != InitialVisibility.None)
             {
-                SetVisible(true);
+                SetVisible(true, true);
             }
             
             if (visibility != InitialVisibility.None)
@@ -102,9 +92,19 @@ namespace Rehawk.UIFramework
             }
         }
 
-        public override void SetVisible(bool visible)
+        public override void SetVisible(bool visible, bool instant = false)
         {
-            IsVisible = visible;
+            wasPreviousVisible = IsVisible;
+                
+            if (visibilityStrategy != null)
+            {
+                visibilityStrategy.SetVisible(this, visible, instant, HandleVisibilityChange);
+            }
+            else
+            {
+                gameObject.SetActive(visible);
+                HandleVisibilityChange();
+            }
         }
 
         [ContextMenu("Toggle")]
@@ -133,7 +133,7 @@ namespace Rehawk.UIFramework
             yield return null;
             
             // Do it one frame after Start to enable child controls Start too. 
-            SetVisible(visibility == InitialVisibility.Visible);
+            SetVisible(visibility == InitialVisibility.Visible, true);
         }
         
         private void OnParentUIPanelBecameVisible(UIPanel panel)
