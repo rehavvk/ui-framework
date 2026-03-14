@@ -11,6 +11,7 @@ namespace Rehawk.UIFramework
     public abstract class VisibilityStrategyBase
     {
         public abstract bool IsVisible { get; }
-        public abstract void SetVisible(UIPanelBase panel, bool visible, Action doneCallback);
+        
+        public abstract void SetVisible(UIPanelBase panel, bool visible, bool instant, Action doneCallback);
     }
 }

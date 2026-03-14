@@ -15,7 +15,7 @@ namespace Rehawk.UIFramework
 
         public override bool IsVisible => canvas.enabled;
 
-        public override void SetVisible(UIPanelBase panel, bool visible, Action doneCallback)
+        public override void SetVisible(UIPanelBase panel, bool visible, bool instant, Action doneCallback)
         {
             canvas.enabled = visible;
             doneCallback?.Invoke();
