@@ -1,7 +1,7 @@
 ﻿namespace Rehawk.UIFramework
 {
     /// <summary>
-    /// Represents the base class for a view that operates with a specific type of model.
+    /// Represents the base class for a view that operates with a specific type of view model.
     /// This class simplifies the management of the view-model binding by providing a strongly-typed interface
     /// and handling the context lifecycle inherited from <see cref="UIContextControlBase{T}"/>.
     /// </summary>
@@ -10,11 +10,30 @@
     /// </typeparam>
     public abstract class ViewBase<T> : UIContextControlBase<T>
     {
-        public T Model => Context;
+        public T ViewModel => Context;
 
-        public void SetModel(T model)
+        public bool HasViewModel => HasContext;
+        
+        public void SetViewModel(T viewModel)
         {
-            SetContext(model);
+            SetContext(viewModel);
         }
+
+        protected sealed override void BeforeContextChanged()
+        {
+            base.BeforeContextChanged();
+            
+            BeforeViewModelChanged();
+        }
+
+        protected sealed override void AfterContextChanged()
+        {
+            base.AfterContextChanged();
+            
+            AfterViewModelChanged();
+        }
+        
+        protected virtual void BeforeViewModelChanged() {}
+        protected virtual void AfterViewModelChanged() {}
     }
 }
