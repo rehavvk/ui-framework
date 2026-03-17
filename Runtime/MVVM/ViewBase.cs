@@ -12,9 +12,28 @@
     {
         public T ViewModel => Context;
 
+        public bool HasViewModel => HasContext;
+        
         public void SetViewModel(T viewModel)
         {
             SetContext(viewModel);
         }
+
+        protected sealed override void BeforeContextChanged()
+        {
+            base.BeforeContextChanged();
+            
+            BeforeViewModelChanged();
+        }
+
+        protected sealed override void AfterContextChanged()
+        {
+            base.AfterContextChanged();
+            
+            AfterViewModelChanged();
+        }
+        
+        protected virtual void BeforeViewModelChanged() {}
+        protected virtual void AfterViewModelChanged() {}
     }
 }
