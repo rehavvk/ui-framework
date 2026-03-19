@@ -83,7 +83,7 @@ namespace Rehawk.UIFramework
         
         public Binding Bind<T>(Expression<Func<T>> memberExpression, BindingDirection direction = BindingDirection.OneWay)
         {
-            var binding = Binding.BindMember(this, () => this, memberExpression, direction);
+            Binding binding = Binding.BindMember(this, () => this, memberExpression, direction);
             
             bindings.Add(binding);
             
@@ -92,7 +92,7 @@ namespace Rehawk.UIFramework
 
         public Binding BindProperty(Func<object> getContext, string propertyName, BindingDirection direction = BindingDirection.OneWay)
         {
-            var binding = Binding.BindProperty(this, getContext, propertyName, direction);
+            Binding binding = Binding.BindProperty(this, getContext, propertyName, direction);
             
             bindings.Add(binding);
             
@@ -101,25 +101,70 @@ namespace Rehawk.UIFramework
 
         public Binding BindContext(Func<UIContextControlBase> getControlCallback, BindingDirection direction = BindingDirection.OneWay)
         {
-            var binding = Binding.BindContext(this, getControlCallback, direction);
+            Binding binding = Binding.BindContext(this, getControlCallback, direction);
             
             bindings.Add(binding);
             
             return binding;
         }
         
+        public Binding BindEvent(Action<Action> subscribe, Action<Action> unsubscribe)
+        {
+            Binding binding = Binding.BindEvent(this, subscribe, unsubscribe);
+
+            bindings.Add(binding);
+
+            return binding;
+        }
+
+        public Binding BindEvent<T>(Action<Action<T>> subscribe, Action<Action<T>> unsubscribe)
+        {
+            Binding binding = Binding.BindEvent<T>(this, subscribe, unsubscribe);
+
+            bindings.Add(binding);
+
+            return binding;
+        }
+
+        public Binding BindEvent<T1, T2>(Action<Action<T1, T2>> subscribe, Action<Action<T1, T2>> unsubscribe)
+        {
+            Binding binding = Binding.BindEvent<T1, T2>(this, subscribe, unsubscribe);
+
+            bindings.Add(binding);
+
+            return binding;
+        }
+
+        public Binding BindEvent<T1, T2, T3>(Action<Action<T1, T2, T3>> subscribe, Action<Action<T1, T2, T3>> unsubscribe)
+        {
+            Binding binding = Binding.BindEvent<T1, T2, T3>(this, subscribe, unsubscribe);
+
+            bindings.Add(binding);
+
+            return binding;
+        }
+
+        public Binding BindCallback(Action callback)
+        {
+            Binding binding = Binding.BindCallback(this, callback);
+
+            bindings.Add(binding);
+
+            return binding;
+        }
+
         public Binding BindCallback<T>(Action<T> setCallback)
         {
-            var binding = Binding.BindCallback<T>(this, () => default, setCallback);
-            
+            Binding binding = Binding.BindCallback<T>(this, () => default, setCallback);
+
             bindings.Add(binding);
-            
+
             return binding;
         }
         
         public Binding BindCallback<T>(Func<T> getCallback, Action<T> setCallback)
         {
-            var binding = Binding.BindCallback<T>(this, getCallback, setCallback);
+            Binding binding = Binding.BindCallback<T>(this, getCallback, setCallback);
             
             bindings.Add(binding);
             

@@ -15,6 +15,7 @@ namespace Rehawk.UIFramework
         
         private IValueConverter converter;
         private BindingDirection direction;
+        private bool isEventSource;
 
         private readonly object parent;
         private readonly List<IBindingConnection> connections = new List<IBindingConnection>();
@@ -65,13 +66,32 @@ namespace Rehawk.UIFramework
             }
         }
 
+        internal void SetEventSource()
+        {
+            isEventSource = true;
+        }
+
         internal void SetDestination(IBindingStrategy strategy)
         {
             if (destinationStrategy != null)
             {
                 destinationStrategy.GotDirty -= OnDestinationGotDirty;
             }
-            
+
+            // When the source is an event strategy, wrap the destination so the callback only fires
+            // when the event actually raised (sentinel value), not on the initial SetDirty pull (null).
+            if (isEventSource)
+            {
+                IBindingStrategy originalStrategy = strategy;
+                strategy = new CallbackBindingStrategy<object>(
+                    () => null,
+                    value =>
+                    {
+                        if (value != null)
+                            originalStrategy.Set(value);
+                    });
+            }
+
             destinationStrategy = strategy;
             destinationStrategy.Evaluate();
             
@@ -238,6 +258,76 @@ namespace Rehawk.UIFramework
             binding.SetDestination(new ContextBindingStrategy(getControlFunction));
             binding.SetDirection(direction);
 
+            return binding;
+        }
+
+        /// <summary>
+        /// Creates a binding with a C# event as the source. Use <c>.To()</c> or <c>.ToCallback()</c>
+        /// to specify the destination. The destination is only invoked when the event actually fires,
+        /// not on the initial SetDirty pull.
+        /// </summary>
+        /// <param name="parent">The object that will own the binding.</param>
+        /// <param name="subscribe">Action that adds a handler to the target event, e.g. <c>h => Context.MyEvent += h</c>.</param>
+        /// <param name="unsubscribe">Action that removes the handler from the target event, e.g. <c>h => Context.MyEvent -= h</c>.</param>
+        /// <returns>A new binding object with the event as its source.</returns>
+        public static Binding BindEvent(object parent, Action<Action> subscribe, Action<Action> unsubscribe)
+        {
+            var binding = new Binding(parent);
+            binding.SetEventSource();
+            binding.SetSource(new EventBindingStrategy(subscribe, unsubscribe));
+            binding.SetDirection(BindingDirection.OneWay);
+            return binding;
+        }
+
+        /// <summary>
+        /// Creates a binding with a C# event as the source, forwarding the event argument as the binding value.
+        /// Use <c>.To()</c> or <c>.ToCallback()</c> to specify the destination. The destination is only invoked
+        /// when the event actually fires, not on the initial SetDirty pull.
+        /// </summary>
+        /// <param name="parent">The object that will own the binding.</param>
+        /// <param name="subscribe">Action that adds a handler to the target event, e.g. <c>h => Context.MyEvent += h</c>.</param>
+        /// <param name="unsubscribe">Action that removes the handler from the target event, e.g. <c>h => Context.MyEvent -= h</c>.</param>
+        /// <typeparam name="T">The type of the event argument.</typeparam>
+        /// <returns>A new binding object with the event as its source.</returns>
+        public static Binding BindEvent<T>(object parent, Action<Action<T>> subscribe, Action<Action<T>> unsubscribe)
+        {
+            var binding = new Binding(parent);
+            binding.SetEventSource();
+            binding.SetSource(new EventBindingStrategy<T>(subscribe, unsubscribe));
+            binding.SetDirection(BindingDirection.OneWay);
+            return binding;
+        }
+
+        public static Binding BindEvent<T1, T2>(object parent, Action<Action<T1, T2>> subscribe, Action<Action<T1, T2>> unsubscribe)
+        {
+            var binding = new Binding(parent);
+            binding.SetEventSource();
+            binding.SetSource(new EventBindingStrategy<T1, T2>(subscribe, unsubscribe));
+            binding.SetDirection(BindingDirection.OneWay);
+            return binding;
+        }
+
+        public static Binding BindEvent<T1, T2, T3>(object parent, Action<Action<T1, T2, T3>> subscribe, Action<Action<T1, T2, T3>> unsubscribe)
+        {
+            var binding = new Binding(parent);
+            binding.SetEventSource();
+            binding.SetSource(new EventBindingStrategy<T1, T2, T3>(subscribe, unsubscribe));
+            binding.SetDirection(BindingDirection.OneWay);
+            return binding;
+        }
+
+        /// <summary>
+        /// Creates a binding whose destination invokes a parameterless callback.
+        /// Intended for use with <c>ToEvent(...)</c> to react to events without a value.
+        /// </summary>
+        /// <param name="parent">The object that will own the binding.</param>
+        /// <param name="callback">The parameterless callback to invoke when the source fires.</param>
+        /// <returns>A new binding object that represents the created callback binding.</returns>
+        public static Binding BindCallback(object parent, Action callback)
+        {
+            var binding = new Binding(parent);
+            binding.SetDestination(new CallbackBindingStrategy<object>(() => null, _ => callback.Invoke()));
+            binding.SetDirection(BindingDirection.OneWay);
             return binding;
         }
 

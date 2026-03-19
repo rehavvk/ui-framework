@@ -38,6 +38,39 @@ namespace Rehawk.UIFramework
             BindingDirection direction = BindingDirection.OneWay);
 
         /// <summary>
+        /// Creates a binding with a C# event as the source. Chain with <c>.To()</c> or <c>.ToCallback()</c>
+        /// to specify the destination. The destination is only invoked when the event actually fires,
+        /// not on the initial SetDirty pull.
+        /// </summary>
+        /// <param name="subscribe">Action that adds a handler to the target event, e.g. <c>h => Context.MyEvent += h</c>.</param>
+        /// <param name="unsubscribe">Action that removes the handler from the target event, e.g. <c>h => Context.MyEvent -= h</c>.</param>
+        /// <returns>Returns a <see cref="Binding"/> object representing the created binding.</returns>
+        Binding BindEvent(Action<Action> subscribe, Action<Action> unsubscribe);
+
+        /// <summary>
+        /// Creates a binding with a C# event as the source, forwarding the event argument as the binding value.
+        /// Chain with <c>.To()</c> or <c>.ToCallback()</c> to specify the destination. The destination is only
+        /// invoked when the event actually fires, not on the initial SetDirty pull.
+        /// </summary>
+        /// <typeparam name="T">The type of the event argument.</typeparam>
+        /// <param name="subscribe">Action that adds a handler to the target event, e.g. <c>h => Context.MyEvent += h</c>.</param>
+        /// <param name="unsubscribe">Action that removes the handler from the target event, e.g. <c>h => Context.MyEvent -= h</c>.</param>
+        /// <returns>Returns a <see cref="Binding"/> object representing the created binding.</returns>
+        Binding BindEvent<T>(Action<Action<T>> subscribe, Action<Action<T>> unsubscribe);
+
+        Binding BindEvent<T1, T2>(Action<Action<T1, T2>> subscribe, Action<Action<T1, T2>> unsubscribe);
+
+        Binding BindEvent<T1, T2, T3>(Action<Action<T1, T2, T3>> subscribe, Action<Action<T1, T2, T3>> unsubscribe);
+
+        /// <summary>
+        /// Creates a binding whose destination invokes a parameterless callback.
+        /// Intended for use with <c>ToEvent(...)</c> to react to events without a value.
+        /// </summary>
+        /// <param name="callback">The parameterless callback to invoke when the source fires.</param>
+        /// <returns>Returns a <see cref="Binding"/> object representing the created binding.</returns>
+        Binding BindCallback(Action callback);
+
+        /// <summary>
         /// Creates a binding for a callback, allowing a value to be set through the specified callback action.
         /// This binding enables interaction between the current instance and external components or data.
         /// </summary>

@@ -14,6 +14,7 @@ The framework is built around **declarative data binding** using **member expres
 - [🔗 Nested & Chained Bindings](#-nested--chained-bindings)
 - [🧩 Architecture Is Optional](#-architecture-is-optional)
 - [💻 Using the Framework with MVVM (Recommended)](#-using-the-framework-with-mvvm-recommended)
+- [🧩 Slices — MVVM without MonoBehaviours](#-slices--mvvm-without-monobehaviours)
 - [🧱 Controls](#-controls)
 - [🚀 Control Groups](#-control-groups)
 - [📋 UI List](#-ui-list)
@@ -24,6 +25,7 @@ The framework is built around **declarative data binding** using **member expres
   - [Custom Visibility Strategy](#custom-visibility-strategy)
 - [📢 Commands](#-commands)
 - [📜 Binding Strategies](#-binding-strategies)
+- [📡 Event Bindings](#-event-bindings)
 - [🔄 Bi-Directional Binding](#-bi-directional-binding)
 - [🔀 Converters](#-converters)
 - [🧩 Combiners](#-combiners)
@@ -251,7 +253,7 @@ public class ExampleView : ViewBase<ExampleViewModel>
     protected override void SetupBindings()
     {
         Bind(() => exampleLabel.Text)
-            .To(() => ViewModel.ExampleNumber)
+            .To(() => Model.ExampleNumber)
             .ConvertToString();
     }
 }
@@ -272,6 +274,126 @@ This means:
 - They are **naming conventions**, not hard rules
 
 They exist for **convenience and clarity**, not enforcement.
+
+## 🧩 Slices — MVVM without MonoBehaviours
+
+The MVVM section above describes a **MonoBehaviour-based** setup where `ViewBase<T>` is a component on a GameObject and `ViewModelBase` is a MonoBehaviour.
+
+**Slices** provide the same pattern for situations where you need UI components that are **not GameObjects** — for example, a reusable widget that is embedded by value inside another view or serialized in the inspector via `[SerializeReference]`.
+
+### The Slice equivalent of MVVM
+
+| MVVM (MonoBehaviour)  | Slice (non-MonoBehaviour)  | Underlying Type                   |
+|-----------------------|---------------------------|-----------------------------------|
+| `ViewBase<T>`         | `SliceBase<T>`            | `UIVirtualContextControlBase<T>`  |
+| `ViewModelBase`       | —                         | —                                 |
+| `Model`               | `SliceModelBase`          | `BindableBase`                    |
+
+A Slice is a **serializable class**, not a component. It has no Transform, no GameObject, and does not appear in the Hierarchy. It is embedded inside a regular View or another control by value.
+
+### Lifecycle
+
+Because Slices are not MonoBehaviours, their lifecycle is managed manually by the containing View.
+
+```csharp
+public class MyView : ViewBase<MyViewModel>
+{
+    [SerializeField] private MySlice _mySlice;
+
+    protected override void Start()
+    {
+        base.Start();
+        _mySlice.Init();
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        _mySlice.Release();
+    }
+
+    protected override void SetupBindings()
+    {
+        base.SetupBindings();
+
+        Bind(() => _mySlice.Model)
+            .To(() => Context.MySliceModel);
+    }
+}
+```
+
+`Init()` sets up bindings. `Release()` unsubscribes all event listeners. Both must be called.
+
+### Defining a Slice
+
+**Model** — a plain, serializable object with bindable properties:
+
+```csharp
+[Serializable]
+public class MySliceModel : SliceModelBase
+{
+    private string _title;
+
+    public string Title
+    {
+        get => _title;
+        set => SetField(ref _title, value);
+    }
+}
+```
+
+**Slice** — a serializable class that binds UI controls to the model:
+
+```csharp
+[Serializable]
+public class MySlice : SliceBase<MySliceModel>
+{
+    [SerializeField] private UILabelBase _titleLabel;
+
+    protected override void SetupBindings()
+    {
+        Bind(() => _titleLabel.Text)
+            .To(() => Model.Title);
+    }
+}
+```
+
+`Model` is a shorthand for `Context` — the strongly-typed model instance set on the slice.
+
+### SlicesContainer — managing multiple slices at once
+
+When a view hosts several slices, `SlicesContainer` removes the manual wiring. Declare it in the view and bind its `Models` property to a collection of `SliceModelBase` instances.
+
+```csharp
+public class MyView : ViewBase<MyViewModel>
+{
+    [SerializeField] private SlicesContainer _slices;
+
+    protected override void Start()
+    {
+        base.Start();
+        _slices.Init();
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        _slices.Release();
+    }
+
+    protected override void SetupBindings()
+    {
+        base.SetupBindings();
+
+        Bind(() => _slices.Models)
+            .To(() => Context.SliceModels);
+    }
+}
+```
+
+`SlicesContainer` matches each incoming `SliceModelBase` to the first Slice whose generic type parameter is compatible, then calls `SetModel` on it automatically.
+
+In the inspector, add the desired Slices to the container's list. The framework handles the rest at runtime.
 
 ## 🧱 Controls
 
@@ -494,13 +616,86 @@ The binding language of the framework comes with multiple strategies already bui
 | `To<T>`         | Bind to a member expression.                |
 | `ToProperty`    | Bind directly to a property of an instance. |
 | `ToCallback<T>` | Bind to read and write callbacks.           |
-| `ToValue<T>`    | Bind directly to an instance.               |  
+| `ToValue<T>`    | Bind directly to an instance.               |
 | `ToCustom`      | Bind you own custom `IBindingStrategy`      |
+| `ToEvent`       | React to a C# event as the binding source.  |
+| `ToCallback`    | Invoke a parameterless callback on change.  |
 
 ```csharp
 Bind(() => myInputField.Value, BindingDirection.TwoWay)
     .To(() => Context.MyInput);
 ```
+
+## 📡 Event Bindings
+
+Beyond property changes, the framework supports binding directly to **C# events**.
+
+Event bindings do **not fire on startup** — they only invoke their destination the first time the event actually fires. This avoids spurious callback invocations during binding setup.
+
+### BindEvent — Event as Source
+
+Use `BindEvent` to subscribe to a C# event and forward it to any destination.
+
+```csharp
+BindEvent(
+        callback => Model.ItemCollected += callback,
+        callback => Model.ItemCollected -= callback)
+    .ToCallback(() =>
+    {
+        // Invoked each time ItemCollected fires, never at startup.
+    });
+```
+
+You can also forward the event argument to the destination:
+
+```csharp
+BindEvent<Item>(
+        callback => Model.ItemCollected += callback,
+        callback => Model.ItemCollected -= callback)
+    .ToCallback<Item>(item =>
+    {
+        // item is the argument passed by the event.
+    });
+```
+
+### BindCallback — React to a Property or Event
+
+`BindCallback(Action)` creates a **parameterless callback** that fires when the source changes.
+
+Use `.To()` to react to **property changes** without caring about the value:
+
+```csharp
+BindCallback(() =>
+    {
+        // Called every time Model.Score changes.
+    })
+    .To(() => Model.Score);
+```
+
+Use `.ToEvent()` to react to a **C# event** as the source:
+
+```csharp
+BindCallback(() =>
+    {
+        // Called every time ItemCollected fires.
+    })
+    .ToEvent(
+        callback => Model.ItemCollected += callback,
+        callback => Model.ItemCollected -= callback);
+```
+
+### Event Arguments
+
+Events with arguments are supported up to three parameters. Multi-argument events pack their args into a `ValueTuple`.
+
+| Overload                                    | Event Signature                             |
+|---------------------------------------------|---------------------------------------------|
+| `BindEvent(subscribe, unsubscribe)`         | `event Action`                              |
+| `BindEvent<T>(subscribe, unsubscribe)`      | `event Action<T>`                           |
+| `BindEvent<T1,T2>(subscribe, unsubscribe)`  | `event Action<T1, T2>`                      |
+| `BindEvent<T1,T2,T3>(subscribe, unsubscribe)` | `event Action<T1, T2, T3>`               |
+
+The same type parameter variants are available on `ToEvent`.
 
 ## 🔄 Bi-Directional Binding
 

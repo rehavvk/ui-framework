@@ -125,6 +125,19 @@ namespace Rehawk.UIFramework
         }
 
         /// <summary>
+        /// Sets a parameterless action as the destination of the binding. Intended for use with
+        /// <c>BindEvent(...)</c> to react to events without receiving a value.
+        /// </summary>
+        /// <param name="binding">The binding instance to configure.</param>
+        /// <param name="callback">The action to invoke when the source changes.</param>
+        /// <returns>The modified binding instance.</returns>
+        public static Binding ToCallback(this Binding binding, Action callback)
+        {
+            binding.SetDestination(new CallbackBindingStrategy<object>(() => null, _ => callback.Invoke()));
+            return binding;
+        }
+
+        /// <summary>
         /// Binds the specified callback function to the current binding, optionally using a value converter.
         /// </summary>
         /// <param name="binding">The binding instance to set the callback function on.</param>
@@ -243,5 +256,74 @@ namespace Rehawk.UIFramework
 
             return binding;
         }
+
+        /// <summary>
+        /// Binds the current binding to a C# event. The destination callback is invoked each time the event fires.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// BindCallback(() => OnDamaged())
+        ///     .ToEvent(
+        ///         h => Context.Damaged += h,
+        ///         h => Context.Damaged -= h);
+        /// </code>
+        /// </example>
+        /// <param name="binding">The binding instance to configure.</param>
+        /// <param name="subscribe">Action that adds a handler to the target event.</param>
+        /// <param name="unsubscribe">Action that removes the handler from the target event.</param>
+        /// <returns>The modified binding instance.</returns>
+        public static Binding ToEvent(this Binding binding, Action<Action> subscribe, Action<Action> unsubscribe)
+        {
+            binding.SetEventSource();
+
+            var bindingStrategy = new EventBindingStrategy(subscribe, unsubscribe);
+            MultiBindingHelper.AddSourceStrategy(binding, bindingStrategy);
+            return binding;
+        }
+
+        /// <summary>
+        /// Binds the current binding to a C# event with one argument. The destination callback is invoked with
+        /// the event argument each time the event fires.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// BindCallback&lt;int&gt;(damage => ShowDamage(damage))
+        ///     .ToEvent&lt;int&gt;(
+        ///         h => Context.Damaged += h,
+        ///         h => Context.Damaged -= h);
+        /// </code>
+        /// </example>
+        /// <param name="binding">The binding instance to configure.</param>
+        /// <param name="subscribe">Action that adds a handler to the target event.</param>
+        /// <param name="unsubscribe">Action that removes the handler from the target event.</param>
+        /// <typeparam name="T">The type of the event argument.</typeparam>
+        /// <returns>The modified binding instance.</returns>
+        public static Binding ToEvent<T>(this Binding binding, Action<Action<T>> subscribe, Action<Action<T>> unsubscribe)
+        {
+            binding.SetEventSource();
+
+            var bindingStrategy = new EventBindingStrategy<T>(subscribe, unsubscribe);
+            MultiBindingHelper.AddSourceStrategy(binding, bindingStrategy);
+            return binding;
+        }
+
+        public static Binding ToEvent<T1, T2>(this Binding binding, Action<Action<T1, T2>> subscribe, Action<Action<T1, T2>> unsubscribe)
+        {
+            binding.SetEventSource();
+
+            var bindingStrategy = new EventBindingStrategy<T1, T2>(subscribe, unsubscribe);
+            MultiBindingHelper.AddSourceStrategy(binding, bindingStrategy);
+            return binding;
+        }
+
+        public static Binding ToEvent<T1, T2, T3>(this Binding binding, Action<Action<T1, T2, T3>> subscribe, Action<Action<T1, T2, T3>> unsubscribe)
+        {
+            binding.SetEventSource();
+
+            var bindingStrategy = new EventBindingStrategy<T1, T2, T3>(subscribe, unsubscribe);
+            MultiBindingHelper.AddSourceStrategy(binding, bindingStrategy);
+            return binding;
+        }
+
     }
 }
