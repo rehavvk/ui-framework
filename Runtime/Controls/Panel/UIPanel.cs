@@ -26,6 +26,8 @@ namespace Rehawk.UIFramework
         
         private bool isEnabled;
         private bool wasPreviousVisible;
+        private bool isVisibilityInitializing;
+        private bool wasVisibilitySetDuringInitialization;
         
         private UIPanel parentUIPanel;
 
@@ -74,10 +76,16 @@ namespace Rehawk.UIFramework
             {
                 SetVisible(true, true);
             }
+
+            isVisibilityInitializing = true;
             
             if (visibility != InitialVisibility.None)
             {
                 StartCoroutine(SetInitialVisibilityDelayed());
+            }
+            else
+            {
+                isVisibilityInitializing = false;
             }
 		}
 
@@ -94,8 +102,13 @@ namespace Rehawk.UIFramework
 
         public override void SetVisible(bool visible, bool instant = false)
         {
+            if (isVisibilityInitializing)
+            {
+                wasVisibilitySetDuringInitialization = true;
+            }
+            
             wasPreviousVisible = IsVisible;
-                
+            
             if (visibilityStrategy != null)
             {
                 visibilityStrategy.SetVisible(this, visible, instant, HandleVisibilityChange);
@@ -132,8 +145,13 @@ namespace Rehawk.UIFramework
         {
             yield return null;
             
-            // Do it one frame after Start to enable child controls Start too. 
-            SetVisible(visibility == InitialVisibility.Visible, true);
+            isVisibilityInitializing = false;
+            
+            // Do it one frame after Start to enable child controls Start too.
+            if (!wasVisibilitySetDuringInitialization)
+            {
+                SetVisible(visibility == InitialVisibility.Visible, true);
+            }
         }
         
         private void OnParentUIPanelBecameVisible(UIPanel panel)
