@@ -1,12 +1,12 @@
 {
-    "name": "com.rehawk.ui-framework",
-    "version": "1.0.0",
-    "displayName": "UI Framework",
-    "description": "Flexible UI framework designed specifically for the Unity Engine. The framework leverages the efficiency and elegance of member expressions to enable data binding, providing a seamless way to connect UI elements to underlying data models.",
-    "unity": "2021.3",
-    "author": {
-        "name": "Frederick Böhke",
-        "email": "frederick@boehke.com",
-        "url": "https://www.boehke.com"
-    }
+  "name": "com.rehawk.ui-framework",
+  "version": "1.0.1",
+  "displayName": "UI Framework",
+  "description": "Flexible UI framework designed specifically for the Unity Engine. The framework leverages the efficiency and elegance of member expressions to enable data binding, providing a seamless way to connect UI elements to underlying data models.",
+  "unity": "2021.3",
+  "author": {
+    "name": "Frederick B\u00f6hke",
+    "email": "frederick@boehke.com",
+    "url": "https://www.boehke.com"
+  }
 }
