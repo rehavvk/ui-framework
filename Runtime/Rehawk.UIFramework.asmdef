@@ -12,6 +12,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.mackysoft.serializereference-extensions",
+            "expression": "1.3.0",
+            "define": "SERIALIZE_REFERENCE_EXTENSIONS"
+        }
+    ],
     "noEngineReferences": false
 }

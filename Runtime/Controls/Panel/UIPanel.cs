@@ -18,7 +18,7 @@ namespace Rehawk.UIFramework
         [SerializeField] private ParentConstraint parentConstraint = ParentConstraint.None;
         
         [Space]
-#if !ODIN_INSPECTOR   
+#if !ODIN_INSPECTOR && SERIALIZE_REFERENCE_EXTENSIONS  
         [SubclassSelector]
 #endif
         [Tooltip("Defines the strategy used to control how the panel's visibility changes are handled and animated. If not set, the panel will use default GameObject activation")]
