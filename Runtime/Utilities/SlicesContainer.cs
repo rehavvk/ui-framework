@@ -7,7 +7,7 @@ namespace Rehawk.UIFramework
     [Serializable]
     public class SlicesContainer
     { 
-#if !ODIN_INSPECTOR  
+#if !ODIN_INSPECTOR && SERIALIZE_REFERENCE_EXTENSIONS  
         [SubclassSelector]
 #endif
         [SerializeReference] private UIVirtualContextControlBase[] _slices;
