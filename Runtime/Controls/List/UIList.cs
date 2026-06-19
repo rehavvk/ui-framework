@@ -139,7 +139,7 @@ namespace Rehawk.UIFramework
 
                     GameObject item = itemStrategy.GetItemObject(i);
                     
-                    if (newDatasets.Contains(oldData))
+                    if (oldData != null && newDatasets.Contains(oldData))
                     {
                         oldDataToItem[oldData] = item;
                     }
