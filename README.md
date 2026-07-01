@@ -33,7 +33,7 @@ The framework is built around **declarative data binding** using **member expres
 - [🔗 Binding Connections](#-binding-connections)
 - [🔗 Binding Tags](#-binding-tags)
 - [♻️ Pooling](#️-pooling)
-- [📦️ Third Party Integrations](#️-pooling)
+- [UI Extensions](#ui-extensions)
 
 ## 📥 Installation
 
@@ -819,6 +819,83 @@ UIGameObjectFactory.Setup((GameObject prefab, Transform parent) =>
 });
 ```
 
+
+## UI Extensions
+
+UI Extensions are small components for adding visual behavior to standard Unity UI components without relying on Unity's built-in `Selectable` transition setup. They are useful when the same interaction or value state should drive multiple visuals, animations, or GameObjects.
+
+All handlers only apply while their component is enabled. Disabling a handler stops it from reacting to runtime changes and editor preview calls.
+
+### Selectable State Handlers
+
+Selectable handlers work with Unity's `Selectable` state model and can be used on Buttons, Toggles, Sliders, Dropdowns, InputFields, or custom components derived from `Selectable`.
+
+The supported states are:
+
+| State | Meaning |
+|-------|---------|
+| `Normal` | Default state. |
+| `Highlighted` | Pointer is over the selectable. |
+| `Pressed` | Pointer is pressing the selectable. |
+| `Selected` | Selectable is selected by the EventSystem. |
+| `Disabled` | Selectable is not interactable. |
+
+Available handlers:
+
+| Handler | Use Case |
+|---------|----------|
+| `SelectableSetActiveHandler` | Sets a target GameObject active/inactive per selectable state. |
+| `SelectableColorTintHandler` | Uses Unity `Graphic.CrossFadeColor` with a `ColorBlock`. |
+| `SelectableColorSwapHandler` | Tweens a `Graphic.color` with a custom `AnimationCurve`. |
+| `SelectableSpriteSwapHandler` | Swaps the `overrideSprite` of an `Image` per selectable state. |
+
+Add a handler to the same GameObject as the `Selectable`, or assign the target `Selectable` in the inspector. The handler evaluates the active interaction state and applies the configured visual state.
+
+### Toggle Value Handlers
+
+Toggle value handlers react to a `Toggle.isOn` value. They apply the current value on enable and listen to `Toggle.onValueChanged` while enabled.
+
+Available handlers:
+
+| Handler | Use Case |
+|---------|----------|
+| `ToggleValueSetActiveHandler` | Activates an optional On GameObject and/or Off GameObject. |
+| `ToggleValueColorTintHandler` | Uses Unity `Graphic.CrossFadeColor` between Off and On colors. |
+| `ToggleValueColorSwapHandler` | Tweens a `Graphic.color` between Off and On colors with a custom `AnimationCurve`. |
+| `ToggleValueSpriteSwapHandler` | Swaps an `Image.overrideSprite` between Off and On sprites. |
+
+### Inspector Preview
+
+Selectable and toggle value handlers have editor preview controls at the bottom of the inspector.
+
+| Handler Type | Preview Control |
+|--------------|-----------------|
+| Selectable state handlers | `Preview State` |
+| Toggle value handlers | `Preview Value` with `ToggleValue`, `Off`, and `On` |
+
+Preview only runs while the handler is selected and enabled. When the handler is deselected, the editor restores the current runtime state. For `ToggleValue`, changing the actual `Toggle.isOn` value while the handler is selected updates the preview.
+
+### PrimeTweenPro Handlers
+
+When the PrimeTweenPro integration is available, the framework also provides animation-based handlers under `Assets/Plugins/Rehawk/UIFramework/PrimeTweenPro`.
+
+| Handler | Use Case |
+|---------|----------|
+| `SelectablePrimeTweenAnimationHandler` | Plays a `TweenAnimationComponent` for each selectable state. |
+| `ToggleValuePrimeTweenAnimationHandler` | Plays a `TweenAnimationComponent` for Toggle Off and On values. |
+
+Each animation slot has a `play...Backwards` option. You can either assign separate `TweenAnimationComponent` instances for each state/value or assign the same reversible animation to multiple slots.
+
+In editor preview, PrimeTween handlers use PrimeTween's edit-mode preview behavior so configured animations can play from the inspector instead of only snapping to their final state.
+
+### Deselect On Pointer Exit
+
+`DeselectOnPointerExit` fixes a common Unity UI edge case where a selected object can stay selected after it becomes unreachable for the pointer. Add it to a selectable object when pointer-exit should clear the current `EventSystem` selection.
+
 ---
 
 ***Happy binding with Unity UI Framework!***
+
+
+
+
