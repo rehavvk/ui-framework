@@ -13,12 +13,14 @@ namespace Rehawk.UIFramework.UIExtensions
 
         protected bool CurrentToggleValue => _toggle != null && _toggle.isOn;
 
+#if UNITY_EDITOR
         protected override void Reset()
         {
             base.Reset();
 
             _toggle ??= GetComponent<Toggle>();
         }
+#endif
 
         protected override void Awake()
         {

@@ -65,12 +65,14 @@ namespace Rehawk.UIFramework.UIExtensions
             }
         }
         
+#if UNITY_EDITOR
         protected override void Reset()
         {
             base.Reset();
 
             _selectable ??= GetComponent<Selectable>();
         }
+#endif
         
         protected override void Awake()
         {
